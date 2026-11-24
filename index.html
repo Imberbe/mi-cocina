@@ -1,0 +1,943 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#55731B">
+<meta name="description" content="Menú semanal, recetas paso a paso y lista de la compra.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head><body>
+<title>Mi cocina</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: una app de bolsillo, columna única de 560px, pestañas abajo como en el móvil */
+:root{
+  --bg:#F4F6EF; --surface:#FFFFFF; --ink:#1E2619; --muted:#646E5B; --line:#DCE2D1;
+  --accent:#55731B; --accent-ink:#FFFFFF; --accent-soft:#E4ECCF; --miss:#B0472C; --miss-soft:#F7E3DC;
+  --plate:#FFFFFF; --plate-rim:#E3E7DA;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12160F; --surface:#1B2117; --ink:#E7ECDF; --muted:#9BA590; --line:#2D3626;
+  --accent:#A9C86A; --accent-ink:#16200A; --accent-soft:#28331C; --miss:#E5917A; --miss-soft:#3A221B;
+  --plate:#262D21; --plate-rim:#343D2D; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12160F; --surface:#1B2117; --ink:#E7ECDF; --muted:#9BA590; --line:#2D3626;
+  --accent:#A9C86A; --accent-ink:#16200A; --accent-soft:#28331C; --miss:#E5917A; --miss-soft:#3A221B;
+  --plate:#262D21; --plate-rim:#343D2D; color-scheme:dark}
+html,body{background:var(--bg)}
+body{color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.app{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px calc(96px + env(safe-area-inset-bottom,0px))}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:1.65rem;font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.5rem;font-weight:700}
+h3{font-size:1.05rem;font-weight:700}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,.tile:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:16px}
+.clock{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.9rem;text-align:right}
+.eyebrow{text-transform:uppercase;letter-spacing:.08em;font-size:.72rem;font-weight:600;color:var(--muted)}
+[hidden]{display:none!important}
+
+/* Ahora */
+.slotbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.seg{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{border:0;background:none;padding:6px 12px;border-radius:999px;font-size:.85rem;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.daynav{display:flex;align-items:center;gap:4px;margin-left:auto}
+.daynav button{border:1px solid var(--line);background:var(--surface);width:32px;height:32px;border-radius:50%}
+.daynav span{min-width:84px;text-align:center;font-weight:600;font-size:.9rem}
+.backnow{border:0;background:none;color:var(--accent);font-weight:600;font-size:.85rem;padding:4px 0}
+.hero{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:18px;display:grid;gap:14px}
+.hero .platebtn{border:0;background:none;padding:0;display:block;width:min(260px,72%);margin:0 auto;border-radius:50%;transition:transform .2s}
+.hero .platebtn:hover{transform:scale(1.03)}
+.hero .tap{text-align:center;color:var(--muted);font-size:.8rem;margin-top:-6px}
+.dishname{font-family:var(--f-display);font-size:1.45rem;font-weight:700;text-align:center;line-height:1.2}
+.extra{text-align:center;color:var(--muted);margin-top:2px}
+.meta{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 11px;font-size:.8rem;font-weight:600;background:var(--accent-soft);color:var(--ink)}
+.pill.miss{background:var(--miss-soft);color:var(--miss)}
+.pill.plain{background:transparent;border:1px solid var(--line);color:var(--muted);font-weight:500}
+.status{border-top:1px solid var(--line);padding-top:12px;display:grid;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:999px;padding:3px 10px 3px 6px;font-size:.82rem;background:var(--bg)}
+.chip .ic{width:20px;height:20px;display:inline-grid;place-items:center;font-size:15px}
+.chip .ic svg{width:20px;height:20px}
+.alts{display:grid;gap:8px;margin-top:4px}
+.alt{display:flex;gap:12px;align-items:center;text-align:left;width:100%;background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:8px 12px 8px 8px}
+.alt svg{width:56px;height:56px;flex:none}
+.alt b{display:block;font-weight:600}
+.alt small{color:var(--muted)}
+
+.ideas{margin-top:22px}
+.ideas .legend{margin:4px 0 10px}
+.igrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.idea{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:10px 8px;display:grid;justify-items:center;gap:3px;text-align:center;min-width:0}
+.idea svg{width:84px;height:84px}
+.idea b{font-size:.85rem;line-height:1.25;font-weight:600;overflow-wrap:anywhere}
+.idea small{font-size:.72rem;color:var(--muted);line-height:1.3;overflow-wrap:anywhere}
+.idea.near{border-style:dashed}
+.idea.near small{color:var(--miss)}
+
+/* Semana */
+.day{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;margin-bottom:10px}
+.day.today{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.day header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.meals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.meal{border:0;background:var(--bg);border-radius:12px;padding:8px 6px;display:grid;justify-items:center;gap:4px;text-align:center;min-width:0}
+.meal svg{width:64px;height:64px}
+.meal .k{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600}
+.meal .n{font-size:.78rem;line-height:1.25;font-weight:500;overflow-wrap:anywhere}
+
+/* Compra */
+.summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.sum{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+.sum b{font-family:var(--f-display);font-size:1.6rem;display:block;font-variant-numeric:tabular-nums;line-height:1.1}
+.sum small{color:var(--muted)}
+.sum.buy b{color:var(--miss)}
+.legend{color:var(--muted);font-size:.85rem;margin:0 0 10px}
+.filter{margin-bottom:14px}
+.sec{margin:18px 0 8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:8px}
+.tile{position:relative;border:1.5px solid var(--line);background:var(--surface);border-radius:var(--r);padding:10px 6px 8px;display:grid;justify-items:center;gap:2px;text-align:center;min-width:0;transition:background .15s,border-color .15s}
+.tile .ic{font-size:34px;line-height:44px;height:44px;width:44px;display:grid;place-items:center}
+.tile .ic svg{width:44px;height:44px}
+.tile .n{font-size:.8rem;font-weight:600;line-height:1.2;overflow-wrap:anywhere}
+.tile .q{font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.tile .mark{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:12px;color:transparent}
+.tile[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
+.tile[aria-pressed="true"] .mark{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tile[aria-pressed="false"] .ic{opacity:.9}
+.staples{color:var(--muted);font-size:.85rem;background:var(--surface);border:1px dashed var(--line);border-radius:var(--r);padding:10px 12px;margin-top:16px}
+.reset{margin-top:18px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-weight:600;font-size:.85rem}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.danger{border-color:var(--miss);color:var(--miss)}
+.sync{color:var(--muted);font-size:.75rem;margin-top:14px}
+
+/* Pestañas */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);padding:6px max(16px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+nav.tabs button{border:0;background:none;border-radius:12px;padding:6px 4px;display:grid;justify-items:center;gap:1px;font-size:.75rem;color:var(--muted);font-weight:600}
+nav.tabs button .i{font-size:20px;line-height:24px}
+nav.tabs button[aria-selected="true"]{color:var(--ink);background:var(--accent-soft)}
+nav.tabs .badge{background:var(--miss);color:#fff;border-radius:999px;font-size:.65rem;padding:0 6px;margin-left:3px;font-variant-numeric:tabular-nums}
+
+/* Receta */
+.sheet{position:fixed;inset:0;z-index:40;background:rgba(10,14,8,.45);display:flex;align-items:flex-end;justify-content:center}
+.sheet .panel{background:var(--surface);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:18px max(18px,env(safe-area-inset-right,0px)) calc(22px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px));animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
+.panel .close{float:right;border:1px solid var(--line);background:var(--bg);width:36px;height:36px;border-radius:50%;font-size:18px}
+.panel .head{display:grid;justify-items:center;gap:6px;text-align:center;clear:both}
+.panel .head svg{width:150px;height:150px}
+.ings{display:grid;gap:6px;margin:8px 0 4px;padding:0;list-style:none}
+.ings li button{width:100%;display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:6px 10px;text-align:left}
+.ings .ic{width:28px;height:28px;display:grid;place-items:center;font-size:20px;flex:none}
+.ings .ic svg{width:28px;height:28px}
+.ings .amt{flex:1;min-width:0}
+.ings .st{font-size:.72rem;font-weight:600;border-radius:999px;padding:2px 8px;white-space:nowrap}
+.ings .st.ok{background:var(--accent-soft)}
+.ings .st.no{background:var(--miss-soft);color:var(--miss)}
+.ings .basic{color:var(--muted);font-size:.85rem;margin:2px 0 0}
+.step{background:var(--bg);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:10px}
+.prog{display:flex;gap:4px;margin:8px 0 12px}
+.prog i{flex:1;height:5px;border-radius:9px;background:var(--line)}
+.prog i.on{background:var(--accent)}
+.step p.txt{font-size:1.08rem;line-height:1.55;margin:0;min-height:4.6em}
+.stepnav{display:flex;justify-content:space-between;gap:8px;margin-top:14px}
+.tip{margin-top:12px;font-size:.88rem;color:var(--muted);border-left:3px solid var(--accent);padding-left:10px}
+.allsteps{margin:10px 0 0;padding-left:1.2em}
+.allsteps li{margin-bottom:6px}
+.linkbtn{border:0;background:none;color:var(--accent);font-weight:600;padding:4px 0;font-size:.85rem}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+/* Menú configurable y recetario */
+.weekhint{color:var(--muted);font-size:.85rem;margin:-4px 0 12px}
+.meal .edit{font-size:.66rem;color:var(--accent);font-weight:600}
+.more{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:4px 12px 12px}
+.more summary{cursor:pointer;padding:10px 0;font-family:var(--f-display);font-weight:700;font-size:1.02rem}
+.more summary small{font-family:var(--f-body);font-weight:400;color:var(--muted);display:block;font-size:.8rem}
+.ptop{display:grid;gap:10px;clear:both;padding-top:4px}
+.quick{display:flex;gap:8px;flex-wrap:wrap}
+.search{width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:10px 12px;font:inherit}
+.search:focus{outline:2px solid var(--accent);outline-offset:1px}
+.fchips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.fchips button{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:.8rem;color:var(--muted)}
+.fchips button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg);font-weight:600}
+.plist{display:grid;gap:6px;margin-top:4px}
+.prow{display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:6px 10px 6px 6px}
+.prow svg{width:52px;height:52px;flex:none}
+.prow span{flex:1;min-width:0}
+.prow b{display:block;font-weight:600;font-size:.9rem;line-height:1.25}
+.prow small{color:var(--muted);font-size:.75rem}
+.prow small.no{color:var(--miss)}
+.prow.cur{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.count{color:var(--muted);font-size:.8rem}
+.showall{width:100%;margin-top:8px}
+</style>
+
+<div class="app">
+  <div class="top">
+    <div>
+      <div class="eyebrow">Mi cocina</div>
+      <h1 id="greet">¿Qué toca?</h1>
+    </div>
+    <div class="clock" id="clock"></div>
+  </div>
+
+  <section class="view" id="v-ahora" aria-label="Ahora">
+    <div class="slotbar">
+      <div class="seg" id="mealSeg" role="group" aria-label="Comida del día">
+        <button id="m-d" data-m="d">Desayuno</button>
+        <button id="m-c" data-m="c">Comida</button>
+        <button id="m-n" data-m="n">Cena</button>
+      </div>
+      <div class="daynav">
+        <button id="dayPrev" aria-label="Día anterior">‹</button>
+        <span id="dayLabel"></span>
+        <button id="dayNext" aria-label="Día siguiente">›</button>
+      </div>
+    </div>
+    <div id="nowBox"></div>
+  </section>
+
+  <section class="view" id="v-semana" aria-label="Semana" hidden>
+    <h2 style="margin-bottom:12px">Menú de la semana</h2>
+    <p class="weekhint">Toca cualquier plato para cambiarlo por otro del recetario. La lista de la compra se ajusta sola a tu menú.</p>
+    <div id="weekBox"></div>
+    <div class="reset" id="menuResetBox"></div>
+  </section>
+
+  <section class="view" id="v-compra" aria-label="Lista de la compra" hidden>
+    <h2>Lista de la compra</h2>
+    <div class="summary">
+      <div class="sum buy"><b id="nBuy">0</b><small id="eBuy">por comprar</small></div>
+      <div class="sum"><b id="nHave">0</b><small>ya en casa</small></div>
+    </div>
+    <p class="legend">Aquí está lo que necesitas para tu menú. Toca un alimento para marcarlo cuando lo tengas en casa; lo que no esté marcado sigue en la lista.</p>
+    <div class="seg filter" id="filterSeg" role="group" aria-label="Filtrar">
+      <button id="f-all" data-f="all">Todo</button>
+      <button id="f-buy" data-f="buy">Por comprar</button>
+      <button id="f-have" data-f="have">En casa</button>
+    </div>
+    <div id="shopBox"></div>
+    <details class="more" id="moreBox"><summary>Otros alimentos <small>No están en tu menú. Márcalos si los tienes en casa y te sugeriré platos con ellos.</small></summary><div id="moreGrid"></div></details>
+    <div class="staples"><b>Siempre en casa:</b> aceite de oliva (de la cooperativa), sal, ajo, pimentón, comino, laurel, orégano, perejil, canela y vinagre.</div>
+    <div class="reset" id="resetBox"></div>
+    <div class="sync" id="sync">Guardando en este dispositivo…</div>
+  </section>
+</div>
+
+<nav class="tabs" aria-label="Secciones">
+  <div class="in" role="tablist">
+    <button role="tab" id="t-ahora" data-v="ahora"><span class="i">🍽️</span>Ahora</button>
+    <button role="tab" id="t-semana" data-v="semana"><span class="i">🗓️</span>Semana</button>
+    <button role="tab" id="t-compra" data-v="compra"><span class="i">🛒</span><span>Compra<span class="badge" id="tabBadge"></span></span></button>
+  </div>
+</nav>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="rTitle" id="panel"></div>
+</div>
+
+<script>
+/* ---------- Dibujos ---------- */
+const jar = (c) => `<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="14" y="6" width="20" height="7" rx="2" fill="#7A6247"/><rect x="11" y="12" width="26" height="31" rx="7" fill="#DCE5E8"/><g fill="${c}" stroke="rgba(0,0,0,.12)" stroke-width=".6"><circle cx="18" cy="35" r="3"/><circle cx="24" cy="36" r="3"/><circle cx="30" cy="35" r="3"/><circle cx="21" cy="30" r="3"/><circle cx="27" cy="30" r="3"/><circle cx="18" cy="25" r="3"/><circle cx="24" cy="24" r="3"/><circle cx="30" cy="25" r="3"/><circle cx="21" cy="19" r="3"/><circle cx="27" cy="19" r="3"/></g></svg>`;
+const can = (c, mark) => `<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="8" y="14" width="32" height="26" rx="3" fill="#AEB6BB"/><rect x="8" y="19" width="32" height="16" fill="${c}"/><ellipse cx="24" cy="14" rx="16" ry="4" fill="#CFD5D8"/><ellipse cx="24" cy="14" rx="11" ry="2.4" fill="#B8C0C4"/>${mark}</svg>`;
+const fishMark = `<path d="M16 27c4-4 10-4 14 0-4 4-10 4-14 0z" fill="#fff"/><path d="M30 27l4-3v6z" fill="#fff"/>`;
+const tomMark = `<circle cx="24" cy="27" r="5" fill="#fff"/><path d="M22 22.5h4" stroke="#3F7A2A" stroke-width="2" stroke-linecap="round"/>`;
+const cup = (lid) => `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 14h24l-3.2 26.5A3 3 0 0 1 29.8 43H18.2a3 3 0 0 1-3-2.5z" fill="#F7F6F0" stroke="#C7CDBD" stroke-width="1.5"/><rect x="10" y="9" width="28" height="6" rx="2.5" fill="${lid}"/><rect x="16" y="24" width="16" height="8" rx="2" fill="#E3EBCF"/></svg>`;
+const salmonSvg = `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M5 30C10 15 36 11 43 21c-3 13-29 18-38 9z" fill="#F08A5D"/><path d="M13 27l20-5M15 32l20-5M12 22l17-4" stroke="#FFD6C2" stroke-width="2" stroke-linecap="round"/></svg>`;
+
+/* ---------- Alimentos (precios aproximados de supermercado) ---------- */
+const SEC = {fruta:"Fruta y verdura", fresco:"Carne, pescado, huevos y lácteos", despensa:"Despensa"};
+const ING = {
+  platano:{n:"Plátanos",e:"🍌",q:"1 kg",p:1.8,s:"fruta"},
+  fruta:{n:"Manzanas o naranjas",e:"🍎",q:"1,5 kg",p:2.5,s:"fruta"},
+  kiwi:{n:"Kiwis",e:"🥝",q:"3 unidades",p:1.5,s:"fruta"},
+  frutos:{n:"Frutos rojos congelados",e:"🍓",q:"300 g",p:2.2,s:"fruta"},
+  limon:{n:"Limones",e:"🍋",q:"malla 500 g",p:1.2,s:"fruta"},
+  aguacate:{n:"Aguacates",e:"🥑",q:"2 unidades",p:2.0,s:"fruta"},
+  tomate:{n:"Tomates",e:"🍅",q:"1 kg",p:2.0,s:"fruta"},
+  cebolla:{n:"Cebollas",e:"🧅",q:"malla 1 kg",p:1.3,s:"fruta"},
+  zanahoria:{n:"Zanahorias",e:"🥕",q:"1 kg",p:0.9,s:"fruta"},
+  pimiento:{n:"Pimientos",e:"🫑",q:"3 unidades",p:1.5,s:"fruta"},
+  calabacin:{n:"Calabacines",e:"🥒",q:"3 unidades",p:1.8,s:"fruta"},
+  patata:{n:"Patatas",e:"🥔",q:"2 kg",p:2.2,s:"fruta"},
+  espinacas:{n:"Espinacas",e:"🥬",q:"400 g",p:1.2,s:"fruta"},
+  lechuga:{n:"Lechuga",e:"🥗",q:"1 unidad",p:0.9,s:"fruta"},
+  brocoli:{n:"Brócoli",e:"🥦",q:"1 unidad",p:1.2,s:"fruta"},
+  champis:{n:"Champiñones",e:"🍄",q:"250 g",p:1.3,s:"fruta"},
+  berenjena:{n:"Berenjena",e:"🍆",q:"1 unidad",p:0.9,s:"fruta"},
+  calabaza:{n:"Calabaza",e:"🎃",q:"1 trozo (1 kg)",p:1.3,s:"fruta"},
+  judias:{n:"Judías verdes congeladas",e:"🫛",q:"1 kg",p:1.6,s:"fruta"},
+  pollo:{n:"Pollo sin piel",e:"🍗",q:"500 g",p:3.3,s:"fresco"},
+  pavo:{n:"Pechuga de pavo (filetes o picada)",e:"🦃",q:"300 g",p:2.9,s:"fresco"},
+  merluza:{n:"Merluza congelada",e:"🐟",q:"400–500 g",p:3.5,s:"fresco"},
+  salmon:{n:"Salmón congelado",svg:salmonSvg,q:"2 lomos",p:4.0,s:"fresco"},
+  huevos:{n:"Huevos",e:"🥚",q:"12 unidades",p:2.5,s:"fresco"},
+  leche:{n:"Leche semidesnatada",e:"🥛",q:"2 L",p:1.8,s:"fresco"},
+  yogur:{n:"Yogur natural",svg:cup("#6E8F2C"),q:"2 packs de 4",p:1.8,s:"fresco"},
+  quesoBatido:{n:"Queso fresco batido 0%",svg:cup("#3E7BB5"),q:"500 g",p:1.3,s:"fresco"},
+  avena:{n:"Copos de avena",e:"🌾",q:"500 g",p:1.3,s:"despensa"},
+  lentejas:{n:"Lentejas pardinas",svg:jar("#8A5A36"),q:"1 kg",p:1.9,s:"despensa"},
+  garbanzos:{n:"Garbanzos cocidos",svg:jar("#D9B26E"),q:"2 botes",p:1.8,s:"despensa"},
+  alubias:{n:"Alubias cocidas",svg:jar("#F2ECDD"),q:"1 bote",p:0.9,s:"despensa"},
+  arroz:{n:"Arroz",e:"🍚",q:"1 kg",p:1.2,s:"despensa"},
+  pasta:{n:"Pasta integral",e:"🍝",q:"500 g",p:0.9,s:"despensa"},
+  fideos:{n:"Fideos",e:"🍜",q:"500 g",p:0.8,s:"despensa"},
+  cuscus:{n:"Cuscús",svg:jar("#E7C66B"),q:"500 g",p:1.1,s:"despensa"},
+  pan:{n:"Pan integral de molde",e:"🍞",q:"1 paquete",p:1.5,s:"despensa"},
+  tortillas:{n:"Tortillas de trigo integral",e:"🫓",q:"8 unidades",p:1.5,s:"despensa"},
+  tomateTri:{n:"Tomate triturado",svg:can("#C8412D",tomMark),q:"400 g",p:0.6,s:"despensa"},
+  caballa:{n:"Caballa en aceite de oliva",svg:can("#2F6F99",fishMark),q:"pack de 3 latas",p:2.8,s:"despensa"},
+  atun:{n:"Atún al natural",svg:can("#C9A227",fishMark),q:"pack de 3 latas",p:2.5,s:"despensa"},
+  sardinas:{n:"Sardinas en aceite de oliva",svg:can("#6F7F8C",fishMark),q:"pack de 3 latas",p:2.4,s:"despensa"},
+  maiz:{n:"Maíz dulce",e:"🌽",q:"pack de 3 latas",p:1.6,s:"despensa"},
+  nueces:{n:"Nueces peladas",e:"🌰",q:"200 g",p:2.2,s:"despensa"},
+};
+const icon = (id) => ING[id].svg || ING[id].e;
+
+/* ---------- Recetario ----------
+   pool: d = desayuno, m = comida o cena.  cat: tipo de plato para filtrar. */
+const CATS = {
+  d:[["all","Todos"],["ok","Lo tengo todo"],["dulce","Dulces"],["salado","Salados"]],
+  m:[["all","Todos"],["ok","Lo tengo todo"],["leg","Legumbres"],["pes","Pescado"],["car","Pollo y pavo"],["hue","Huevos"],["ver","Verduras"],["pas","Pasta, arroz y cuscús"]],
+};
+const R = {
+  /* Desayunos */
+  avena:{n:"Avena cocida con plátano",pool:"d",cat:"dulce",t:"5 min",r:"1 ración",base:"#E8D7B0",em:["🍌","🌾"],
+    ing:[["avena","40 g (4 cucharadas)"],["leche","200 ml"],["platano","½ plátano"]],basic:"Canela si tienes",
+    steps:["Pon la avena y la leche en un cazo a fuego medio.","Remueve 3–4 minutos hasta que espese. Si queda muy densa, añade un chorrito de leche.","Sírvela con el plátano en rodajas y canela por encima. No hace falta azúcar: el plátano ya endulza."],
+    tip:"Atajo: 2 minutos en el microondas en un bol grande, removiendo a mitad."},
+  tostada:{n:"Tostada integral con tomate",pool:"d",cat:"salado",t:"3 min",r:"1 ración",base:null,em:["🍞","🍅","🍎"],
+    ing:[["pan","2 rebanadas"],["tomate","1 maduro"],["fruta","1 pieza"]],basic:"1 cucharada de aceite de oliva y una pizca de sal",
+    steps:["Tuesta el pan.","Ralla el tomate, o úntalo partido por la mitad directamente sobre el pan.","Pon el tomate encima, un chorrito de aceite y una pizca de sal. Acompaña con una pieza de fruta."]},
+  yogur:{n:"Yogur con avena y nueces",pool:"d",cat:"dulce",t:"2 min",r:"1 ración",base:"#F3F1EA",em:["🌰","🍎"],
+    ing:[["yogur","1 yogur natural"],["avena","2 cucharadas"],["nueces","3 nueces"],["fruta","fruta al gusto"]],
+    steps:["Mezcla el yogur con la avena. Si la dejas 5 minutos, se ablanda.","Añade las nueces troceadas y la fruta en trozos por encima."]},
+  sabado:{n:"Tostadas con huevos revueltos",pool:"d",cat:"salado",t:"10 min",r:"2 personas",base:null,em:["🍞","🍳","🍊"],
+    ing:[["pan","4 rebanadas"],["tomate","2 tomates"],["huevos","3 huevos"],["fruta","2 piezas"]],basic:"Aceite de oliva y sal",
+    steps:["Prepara las tostadas con tomate y un chorrito de aceite.","Bate los huevos con una pizca de sal. Un chorrito de leche los deja más cremosos.","Pon una sartén antiadherente a fuego medio-bajo con una cucharadita de aceite y echa los huevos.","Remueve sin parar 2–3 minutos. Apártalos cuando aún estén jugosos: se terminan de hacer con el calor."]},
+  domingo:{n:"Yogur con avena, nueces y plátano",pool:"d",cat:"dulce",t:"3 min",r:"2 personas",base:"#F3F1EA",em:["🍌","🌰","☕"],
+    ing:[["yogur","2 yogures"],["avena","4 cucharadas"],["nueces","6 nueces"],["platano","1 plátano"]],basic:"Café o leche al gusto",
+    steps:["Mezcla cada yogur con 2 cucharadas de avena y deja reposar 5 minutos.","Corta el plátano en rodajas.","Reparte el plátano y las nueces troceadas por encima. Acompaña con café o leche."]},
+  tostadaHuevo:{n:"Tostada con huevo a la plancha",pool:"d",cat:"salado",t:"8 min",r:"1 ración",base:null,em:["🍞","🍳"],
+    ing:[["pan","2 rebanadas"],["huevos","1"],["tomate","½"]],basic:"Aceite de oliva y sal",
+    steps:["Tuesta el pan y úntalo con el tomate rallado.","Pon una sartén antiadherente a fuego medio con unas gotas de aceite.","Casca el huevo y tápalo 2–3 minutos, hasta que la clara cuaje y la yema siga jugosa.","Ponlo sobre la tostada con una pizca de sal."]},
+  batido:{n:"Batido de plátano y avena",pool:"d",cat:"dulce",t:"3 min",r:"1 ración",base:"#EDE3C8",em:["🍌","🥛"],
+    ing:[["leche","250 ml"],["platano","1"],["avena","2 cucharadas"]],basic:"Canela si tienes",
+    steps:["Pela el plátano y trocéalo.","Ponlo en el vaso de la batidora con la leche, la avena y la canela.","Tritura 1 minuto, hasta que no queden grumos."],
+    tip:"Con el plátano muy maduro queda dulce sin añadir azúcar."},
+  yogurFruta:{n:"Yogur con fruta troceada",pool:"d",cat:"dulce",t:"3 min",r:"1 ración",base:"#F3F1EA",em:["🍎","🍌"],
+    ing:[["yogur","1"],["fruta","1 pieza"],["platano","½"]],basic:"Canela si tienes",
+    steps:["Trocea la fruta y el plátano.","Ponlos sobre el yogur y espolvorea un poco de canela."]},
+  avenaManzana:{n:"Avena con manzana y canela",pool:"d",cat:"dulce",t:"8 min",r:"1 ración",base:"#E9D6AE",em:["🍎","🌾"],
+    ing:[["avena","40 g"],["leche","200 ml"],["fruta","1 manzana"]],basic:"Canela",
+    steps:["Pela la manzana y córtala en dados pequeños.","Ponla en un cazo con la avena, la leche y una pizca de canela.","Cuece a fuego medio 5 minutos, removiendo, hasta que la manzana se ablande y la avena espese."]},
+  tostadaAguacate:{n:"Tostada con aguacate y tomate",pool:"d",cat:"salado",t:"5 min",r:"1 ración",base:null,em:["🥑","🍞","🍅"],
+    ing:[["pan","2 rebanadas"],["aguacate","½"],["tomate","½"]],basic:"Sal y unas gotas de aceite",
+    steps:["Tuesta el pan.","Aplasta el medio aguacate con un tenedor y una pizca de sal.","Úntalo en el pan y pon encima el tomate en rodajas finas."],
+    tip:"El aguacate tiene grasa buena, como el aceite de oliva: ayuda con el colesterol."},
+  quesoFrutos:{n:"Queso fresco batido con frutos rojos",pool:"d",cat:"dulce",t:"3 min",r:"1 ración",base:"#F4F3EE",em:["🍓","🌰"],
+    ing:[["quesoBatido","150 g"],["frutos","1 puñado"],["nueces","3"]],
+    steps:["Saca los frutos rojos del congelador 10 minutos antes, o caliéntalos 30 segundos en el microondas.","Pon el queso batido en un bol y los frutos rojos encima.","Añade las nueces troceadas."]},
+  tortitas:{n:"Tortitas de avena y plátano",pool:"d",cat:"dulce",t:"15 min",r:"1 ración (4 tortitas)",base:null,em:["🥞","🍌"],
+    ing:[["avena","40 g"],["platano","1 maduro"],["huevos","1"]],basic:"Canela y unas gotas de aceite",
+    steps:["Aplasta el plátano con un tenedor hasta hacerlo puré.","Mézclalo con el huevo, la avena y una pizca de canela. Deja reposar 5 minutos.","Pon una sartén antiadherente a fuego medio con unas gotas de aceite.","Echa la masa en 4 montoncitos y hazlos 2 minutos por cada lado."]},
+  tostadaAtun:{n:"Tostada con tomate y atún",pool:"d",cat:"salado",t:"4 min",r:"1 ración",base:null,em:["🍞","🐟","🍅"],
+    ing:[["pan","2 rebanadas"],["atun","1 lata"],["tomate","1"]],basic:"Unas gotas de aceite y orégano",
+    steps:["Tuesta el pan y frótalo con medio tomate.","Escurre el atún y repártelo encima.","Corona con el resto del tomate en rodajas y una pizca de orégano."]},
+  avenaNoche:{n:"Avena de la noche anterior con frutos rojos",pool:"d",cat:"dulce",t:"5 min + una noche",r:"1 ración",base:"#EFE4CC",em:["🍓","🌾"],
+    ing:[["avena","40 g"],["leche","150 ml"],["yogur","1"],["frutos","1 puñado"]],basic:"Canela si tienes",
+    steps:["Por la noche, mezcla en un tarro la avena, la leche y el yogur.","Añade los frutos rojos congelados encima y tapa.","Déjalo en la nevera toda la noche. Por la mañana está listo para comer frío."]},
+  batidoFrutos:{n:"Batido de frutos rojos y yogur",pool:"d",cat:"dulce",t:"3 min",r:"1 ración",base:"#D98AA0",em:["🍓","🥛"],
+    ing:[["yogur","1"],["frutos","1 puñado"],["leche","150 ml"],["platano","½"]],
+    steps:["Pon todo en el vaso de la batidora.","Tritura 1 minuto hasta que quede cremoso."],
+    tip:"Con los frutos rojos congelados queda fresquito, como un helado líquido."},
+  tostadaQueso:{n:"Tostada con queso fresco batido y plátano",pool:"d",cat:"dulce",t:"4 min",r:"1 ración",base:null,em:["🍞","🍌"],
+    ing:[["pan","2 rebanadas"],["quesoBatido","2 cucharadas"],["platano","½"]],basic:"Canela",
+    steps:["Tuesta el pan.","Úntalo con el queso batido.","Pon encima el plátano en rodajas y espolvorea canela."]},
+  yogurKiwi:{n:"Yogur con kiwi y avena",pool:"d",cat:"dulce",t:"3 min",r:"1 ración",base:"#F3F1EA",em:["🥝","🌾"],
+    ing:[["yogur","1"],["kiwi","1"],["avena","2 cucharadas"]],
+    steps:["Pela el kiwi y córtalo en dados.","Mezcla el yogur con la avena.","Pon el kiwi por encima."]},
+
+  /* Comidas y cenas: legumbres */
+  lentejas:{n:"Lentejas estofadas con verduras",pool:"m",cat:"leg",t:"45 min",r:"2 raciones",base:"#8B5A3C",em:["🥕","🫑"],
+    ing:[["lentejas","200 g"],["zanahoria","1"],["pimiento","½"],["cebolla","1 pequeña"],["patata","1 pequeña"]],basic:"1 diente de ajo, 1 cucharadita de pimentón, 1 hoja de laurel, 2 cucharadas de aceite y sal",
+    steps:["Lava las lentejas. Las pardinas no necesitan remojo.","Pica la cebolla, el pimiento, el ajo y la zanahoria. Sofríelos en una olla con el aceite a fuego medio unos 8 minutos.","Aparta la olla del fuego, añade el pimentón y remueve 10 segundos para que no se queme.","Echa las lentejas, la patata en trozos, el laurel y unos 900 ml de agua.","Cuece a fuego suave 30–35 minutos, hasta que estén tiernas. Sala al final.","Para espesar el caldo, aplasta un trozo de patata con el tenedor y remueve."],
+    tip:"Sin chorizo ni morcilla: son lo que más grasa saturada añade, y el pimentón ya da el sabor."},
+  garbanzos:{n:"Garbanzos con espinacas",pool:"m",cat:"leg",t:"20 min",r:"2 raciones",base:"#CDA764",em:["🥬","🧄"],
+    ing:[["garbanzos","2 botes (unos 800 g)"],["espinacas","300 g"],["cebolla","1"],["pan","1 rebanada"]],basic:"2 dientes de ajo, comino, pimentón, 2 cucharadas de aceite, un chorrito de vinagre y sal",
+    steps:["Enjuaga los garbanzos en un colador: quitas el líquido del bote y gran parte de la sal.","Fríe ligeramente el pan y los ajos en el aceite. Sácalos y májalos con el comino y el vinagre.","En la misma sartén, sofríe la cebolla picada 5 minutos. Añade las espinacas y deja que se reduzcan.","Echa el pimentón, los garbanzos, la pasta de pan y ajo y un vaso de agua.","Deja que hierva suave 8–10 minutos hasta que espese. Ajusta la sal."]},
+  ensaladaGarbanzos:{n:"Ensalada de garbanzos",pool:"m",cat:"leg",t:"10 min",r:"1 ración",base:null,em:["🥗","🍅"],
+    ing:[["garbanzos","½ bote"],["tomate","1"],["cebolla","¼"],["lechuga","unas hojas"]],basic:"Aceite, vinagre, comino y sal",
+    steps:["Enjuaga los garbanzos en un colador y escúrrelos bien.","Trocea el tomate, la lechuga y la cebolla muy fina.","Mézclalo todo y aliña con aceite, vinagre, una pizca de comino y sal."],
+    tip:"Si te queda una lata de caballa o atún, añádela y será un plato más completo."},
+  garbanzosSalteados:{n:"Garbanzos salteados con verduras",pool:"m",cat:"leg",t:"15 min",r:"1 ración",base:"#CDA764",em:["🫑","🥒"],
+    ing:[["garbanzos","½ bote"],["pimiento","½"],["calabacin","½"],["cebolla","¼"]],basic:"Pimentón, comino, 1 cucharada de aceite y sal",
+    steps:["Enjuaga y escurre los garbanzos.","Corta la cebolla, el pimiento y el calabacín en dados y saltéalos con el aceite 6–7 minutos.","Añade los garbanzos, el pimentón y el comino y saltea 3 minutos más. Ajusta la sal."]},
+  lentejasArroz:{n:"Lentejas con arroz",pool:"m",cat:"leg",t:"45 min",r:"2 raciones",base:"#7E5637",em:["🍚","🥕"],
+    ing:[["lentejas","150 g"],["arroz","50 g"],["cebolla","1"],["zanahoria","1"]],basic:"1 diente de ajo, pimentón, laurel, 2 cucharadas de aceite y sal",
+    steps:["Sofríe la cebolla, el ajo y la zanahoria picados con el aceite 6 minutos.","Aparta del fuego, añade el pimentón y remueve.","Echa las lentejas lavadas, el laurel y 800 ml de agua. Cuece 25 minutos a fuego suave.","Añade el arroz y un poco más de agua si hace falta. Cuece 15 minutos más y sala."],
+    tip:"Legumbre y cereal juntos dan una proteína tan completa como la de la carne."},
+  alubias:{n:"Alubias guisadas con verduras",pool:"m",cat:"leg",t:"30 min",r:"2 raciones",base:"#B5653F",em:["🫑","🥕"],
+    ing:[["alubias","1 bote"],["pimiento","½"],["cebolla","1"],["zanahoria","1"],["tomateTri","3 cucharadas"]],basic:"1 diente de ajo, pimentón, laurel, 2 cucharadas de aceite y sal",
+    steps:["Enjuaga las alubias en un colador.","Sofríe la cebolla, el ajo, el pimiento y la zanahoria picados con el aceite 8 minutos.","Añade el tomate y el pimentón y cocina 2 minutos.","Echa las alubias, el laurel y 400 ml de agua. Cuece 15 minutos a fuego suave y sala."]},
+  hummus:{n:"Hummus con palitos de zanahoria",pool:"m",cat:"leg",t:"10 min",r:"2 raciones",base:"#E2C792",em:["🥕","🍋"],
+    ing:[["garbanzos","1 bote"],["limon","½"],["zanahoria","2"],["pan","2 rebanadas"]],basic:"1 diente de ajo, comino, 2 cucharadas de aceite y sal",
+    steps:["Enjuaga los garbanzos y guarda un poco de agua.","Tritúralos con el zumo del limón, el ajo, el comino, el aceite, sal y 3–4 cucharadas de agua hasta que quede cremoso.","Pela las zanahorias y córtalas en palitos.","Sírvelo con los palitos y el pan tostado para mojar."],
+    tip:"Sin tahini también sale rico. Aguanta 3 días en la nevera, tapado."},
+  ensaladaLentejas:{n:"Ensalada de lentejas",pool:"m",cat:"leg",t:"35 min",r:"2 raciones",base:null,em:["🍅","🫑"],
+    ing:[["lentejas","150 g"],["tomate","1"],["pimiento","½"],["cebolla","¼"]],basic:"Aceite, vinagre y sal",
+    steps:["Cuece las lentejas en agua con sal y una hoja de laurel unos 25 minutos, hasta que estén tiernas pero enteras.","Escúrrelas y déjalas enfriar.","Pica el tomate, el pimiento y la cebolla muy finos.","Mézclalo todo y aliña con aceite, vinagre y sal."]},
+  potaje:{n:"Potaje de garbanzos con calabaza",pool:"m",cat:"leg",t:"30 min",r:"2 raciones",base:"#D9963A",em:["🎃","🥬"],
+    ing:[["garbanzos","1 bote"],["calabaza","300 g"],["cebolla","1"],["espinacas","100 g"]],basic:"1 diente de ajo, pimentón, comino, 2 cucharadas de aceite y sal",
+    steps:["Sofríe la cebolla y el ajo picados con el aceite 5 minutos.","Añade la calabaza en dados, el pimentón y el comino y remueve 1 minuto.","Cubre con 500 ml de agua y cuece 15 minutos, hasta que la calabaza esté tierna.","Añade los garbanzos enjuagados y las espinacas. Cuece 5 minutos más y sala."]},
+  chili:{n:"Chili de alubias con arroz",pool:"m",cat:"leg",t:"30 min",r:"2 raciones",base:"#A8432E",em:["🌽","🫑","🍚"],
+    ing:[["alubias","1 bote"],["tomateTri","400 g"],["pimiento","1"],["cebolla","1"],["maiz","½ lata"],["arroz","120 g"]],basic:"1 diente de ajo, comino, pimentón (picante si te gusta), 1 cucharada de aceite y sal",
+    steps:["Pon el arroz a cocer en agua con sal 18 minutos.","Sofríe la cebolla, el ajo y el pimiento picados con el aceite 6 minutos.","Añade el comino y el pimentón, y después el tomate. Cocina 5 minutos.","Echa las alubias enjuagadas y el maíz escurrido. Cuece 10 minutos a fuego suave.","Sírvelo con el arroz al lado."]},
+  ensaladaAlubias:{n:"Ensalada de alubias con atún",pool:"m",cat:"leg",t:"10 min",r:"1 ración",base:null,em:["🐟","🍅"],
+    ing:[["alubias","½ bote"],["atun","1 lata"],["tomate","1"],["cebolla","¼"]],basic:"Aceite, vinagre, perejil y sal",
+    steps:["Enjuaga las alubias y escúrrelas.","Trocea el tomate y la cebolla muy fina.","Mézclalo con el atún escurrido y aliña con aceite, vinagre, perejil y sal."]},
+
+  /* Pescado */
+  merluzaHorno:{n:"Merluza al horno con patata",pool:"m",cat:"pes",t:"40 min",r:"1 ración",base:"#EEE5D0",em:["🐟","🥔","🧅"],
+    ing:[["merluza","200 g"],["patata","1 mediana"],["cebolla","½"]],basic:"1 diente de ajo, perejil, 2 cucharadas de aceite y sal",
+    steps:["Precalienta el horno a 200 °C. Descongela la merluza la noche antes en la nevera.","Corta la patata en rodajas finas y la cebolla en tiras. Ponlas en una bandeja con 1 cucharada de aceite y sal.","Hornea 25 minutos.","Coloca la merluza encima con el ajo picado, el perejil, la otra cucharada de aceite y sal.","Hornea 10–12 minutos más, hasta que el pescado se separe en láminas."]},
+  merluzaPlancha:{n:"Merluza a la plancha con calabacín",pool:"m",cat:"pes",t:"15 min",r:"1 ración",base:null,em:["🐟","🥒"],
+    ing:[["merluza","200 g"],["calabacin","½ (o el pimiento que quede)"]],basic:"1 cucharada de aceite y sal",
+    steps:["Corta la verdura en tiras y saltéala con media cucharada de aceite 6–7 minutos. Apártala.","Seca bien la merluza con papel de cocina y sálala.","Hazla en la misma sartén bien caliente con el resto del aceite, 3 minutos por cada lado."]},
+  merluzaVerde:{n:"Merluza en salsa verde con patata",pool:"m",cat:"pes",t:"30 min",r:"1 ración",base:"#B9CC8F",em:["🐟","🥔"],
+    ing:[["merluza","200 g"],["patata","1"],["cebolla","¼"]],basic:"2 dientes de ajo, mucho perejil, 1 cucharada de aceite y sal",
+    steps:["Corta la patata en rodajas de medio dedo y cuécela en agua con sal 12 minutos. Guarda un vaso del agua.","En una cazuela, sofríe la cebolla y el ajo muy picados con el aceite 4 minutos.","Añade el perejil picado y el vaso de agua de cocer la patata.","Pon la merluza y la patata en la cazuela y cuece 5–6 minutos, moviendo la cazuela para que la salsa espese."],
+    tip:"El almidón del agua de la patata espesa la salsa sin harina."},
+  salmonBrocoli:{n:"Salmón al horno con brócoli",pool:"m",cat:"pes",t:"25 min",r:"1 ración",base:null,em:["🐟","🥦","🍋"],
+    ing:[["salmon","1 lomo"],["brocoli","½"],["limon","½"]],basic:"1 cucharada de aceite, ajo y sal",
+    steps:["Precalienta el horno a 200 °C. Descongela el salmón la noche antes.","Separa el brócoli en ramitos y ponlo en una bandeja con aceite, ajo picado y sal. Hornea 10 minutos.","Pon el salmón en la bandeja con sal y unas rodajas de limón encima.","Hornea 12 minutos más."],
+    tip:"El salmón es pescado azul: su omega-3 es de lo mejor para el colesterol."},
+  sardinasTostada:{n:"Tostadas de sardinas con tomate",pool:"m",cat:"pes",t:"5 min",r:"1 ración",base:null,em:["🍞","🐟","🍅"],
+    ing:[["sardinas","1 lata"],["pan","2 rebanadas"],["tomate","1"],["lechuga","unas hojas"]],basic:"Unas gotas de limón o vinagre",
+    steps:["Tuesta el pan y frótalo con medio tomate.","Escurre las sardinas y ponlas encima.","Sírvelas con una ensalada de lechuga y el resto del tomate."]},
+  berenjenaAtun:{n:"Berenjena rellena de atún",pool:"m",cat:"pes",t:"40 min",r:"1 ración",base:null,em:["🍆","🐟"],
+    ing:[["berenjena","1"],["atun","1 lata"],["tomateTri","100 g"],["cebolla","¼"]],basic:"1 cucharada de aceite, orégano y sal",
+    steps:["Precalienta el horno a 200 °C. Parte la berenjena a lo largo y hazle cortes en cuadrícula en la carne.","Hornéala 25 minutos boca arriba con un poco de sal y aceite.","Vacía la carne con una cuchara y saltéala con la cebolla picada 4 minutos. Añade el tomate y el atún.","Rellena las mitades, pon orégano y hornea 8 minutos más."]},
+  merluzaJudias:{n:"Merluza con judías verdes y patata",pool:"m",cat:"pes",t:"25 min",r:"1 ración",base:null,em:["🐟","🫛","🥔"],
+    ing:[["merluza","200 g"],["judias","200 g"],["patata","1"]],basic:"1 diente de ajo, pimentón, 1 cucharada de aceite y sal",
+    steps:["Cuece la patata en trozos y las judías en agua con sal 15 minutos. Escúrrelas.","Saltea el ajo laminado con el aceite, apártalo del fuego y añade una pizca de pimentón.","Haz la merluza a la plancha 3 minutos por cada lado.","Sírvela con la verdura y el aceite de ajo por encima."]},
+  caballaTostada:{n:"Caballa sobre tostada y ensalada",pool:"m",cat:"pes",t:"5 min",r:"1 ración",base:null,em:["🍞","🐟","🥗"],
+    ing:[["caballa","1 lata"],["pan","2 rebanadas"],["tomate","1"],["lechuga","unas hojas"]],basic:"Aceite, vinagre y sal",
+    steps:["Tuesta el pan y frota medio tomate por encima.","Escurre la caballa, desmígala con un tenedor y repártela sobre las tostadas.","Al lado, ensalada de lechuga con el resto del tomate, aceite, vinagre y sal."]},
+  ensaladaPatata:{n:"Ensalada de patata con caballa",pool:"m",cat:"pes",t:"25 min",r:"1 ración",base:null,em:["🥔","🐟","🍅"],
+    ing:[["patata","1 mediana"],["caballa","1 lata"],["tomate","1"],["cebolla","¼"]],basic:"Aceite, vinagre y sal",
+    steps:["Cuece la patata con piel en agua con sal unos 20 minutos, hasta que el cuchillo entre fácil.","Déjala templar, pélala y córtala en dados.","Mézclala con el tomate troceado, la cebolla muy fina y la caballa escurrida.","Aliña con aceite, vinagre y sal."]},
+  wrapAtun:{n:"Wrap de atún y ensalada",pool:"m",cat:"pes",t:"5 min",r:"1 ración",base:null,em:["🫓","🐟","🥗"],
+    ing:[["tortillas","2"],["atun","1 lata"],["lechuga","unas hojas"],["tomate","1"],["maiz","2 cucharadas"]],basic:"Unas gotas de aceite y sal",
+    steps:["Calienta las tortillas 20 segundos en una sartén.","Reparte la lechuga en tiras, el tomate en dados, el atún escurrido y el maíz.","Enrolla cada tortilla bien apretada y córtala por la mitad."]},
+
+  /* Pollo y pavo */
+  arroz:{n:"Arroz con pollo y verduras",pool:"m",cat:"car",t:"35 min",r:"2 raciones",base:"#E6C463",em:["🍗","🫑","🥕"],
+    ing:[["arroz","150 g"],["pollo","300 g en trozos"],["pimiento","½"],["calabacin","½"],["zanahoria","1"],["cebolla","½"],["tomateTri","2 cucharadas"]],basic:"1 diente de ajo, 1 cucharadita de pimentón, 2 cucharadas de aceite y sal",
+    steps:["Salpimienta el pollo y dóralo en una cazuela con el aceite, 5 minutos. Sácalo.","En el mismo aceite, sofríe la cebolla, el ajo, el pimiento, la zanahoria y el calabacín picados unos 8 minutos.","Añade el tomate y el pimentón, remueve 1 minuto y echa el arroz para que se impregne.","Vuelve a poner el pollo y añade 450 ml de agua caliente con sal.","Cuece 18 minutos a fuego medio-bajo sin remover.","Deja reposar 5 minutos tapado."],
+    tip:"La segunda ración aguanta 3 días en la nevera o se congela para otra semana."},
+  polloPlancha:{n:"Pollo a la plancha con ensalada",pool:"m",cat:"car",t:"15 min",r:"1 ración",base:null,em:["🍗","🥗"],
+    ing:[["pollo","150 g"],["lechuga","unas hojas"],["tomate","1"]],basic:"Aceite, vinagre, pimentón y sal",
+    steps:["Si la pechuga es gruesa, ábrela en filetes finos.","Sálala y ponle un poco de pimentón.","Hazla en una sartén bien caliente con unas gotas de aceite, 3–4 minutos por cada lado.","Sírvela con la lechuga y el tomate aliñados."]},
+  polloLimon:{n:"Pollo al limón con arroz",pool:"m",cat:"car",t:"30 min",r:"1 ración",base:"#F0DFA0",em:["🍗","🍋","🍚"],
+    ing:[["pollo","150 g"],["limon","½"],["arroz","70 g"],["cebolla","¼"]],basic:"1 diente de ajo, 1 cucharada de aceite, perejil y sal",
+    steps:["Pon el arroz a cocer en agua con sal 18 minutos.","Corta el pollo en tiras y dóralo con el aceite 5 minutos.","Añade la cebolla y el ajo picados y cocina 3 minutos más.","Echa el zumo del medio limón y un chorrito de agua. Deja que reduzca 2 minutos y añade perejil.","Sírvelo con el arroz."]},
+  polloYogur:{n:"Pollo especiado con yogur y arroz",pool:"m",cat:"car",t:"30 min",r:"1 ración",base:"#E3B25A",em:["🍗","🥕","🍚"],
+    ing:[["pollo","150 g"],["yogur","1"],["zanahoria","1"],["calabacin","½"],["arroz","70 g"]],basic:"1 cucharadita de curry (o pimentón y comino), 1 cucharada de aceite y sal",
+    steps:["Pon el arroz a cocer en agua con sal 18 minutos.","Corta el pollo en dados y dóralo con el aceite 5 minutos.","Añade la zanahoria y el calabacín en dados y las especias. Cocina 8 minutos.","Apaga el fuego y mezcla con el yogur para hacer una salsa cremosa. Sírvelo con el arroz."],
+    tip:"El yogur hace de nata sin su grasa saturada."},
+  pavoChampis:{n:"Pavo salteado con champiñones",pool:"m",cat:"car",t:"20 min",r:"1 ración",base:null,em:["🍄","🍚"],
+    ing:[["pavo","150 g"],["champis","150 g"],["cebolla","¼"],["arroz","70 g"]],basic:"1 diente de ajo, perejil, 1 cucharada de aceite y sal",
+    steps:["Pon el arroz a cocer en agua con sal 18 minutos.","Corta el pavo en tiras y saltéalo con el aceite 4 minutos. Sácalo.","En la misma sartén, saltea la cebolla, el ajo y los champiñones laminados 6 minutos.","Vuelve a poner el pavo, añade perejil y sirve con el arroz."]},
+  wrapPollo:{n:"Wrap de pollo y pimientos",pool:"m",cat:"car",t:"20 min",r:"1 ración",base:null,em:["🫓","🍗","🫑"],
+    ing:[["tortillas","2"],["pollo","150 g"],["pimiento","½"],["cebolla","¼"],["lechuga","unas hojas"]],basic:"Pimentón, comino, 1 cucharada de aceite y sal",
+    steps:["Corta el pollo, el pimiento y la cebolla en tiras.","Saltéalo todo con el aceite, el pimentón, el comino y sal 8–10 minutos.","Calienta las tortillas, pon lechuga y el salteado y enróllalas."]},
+  polloHorno:{n:"Pollo al horno con verduras",pool:"m",cat:"car",t:"50 min",r:"2 raciones",base:"#EFE6D2",em:["🍗","🥔","🫑"],
+    ing:[["pollo","300 g"],["patata","2"],["pimiento","1"],["cebolla","1"],["calabacin","1"]],basic:"2 dientes de ajo, orégano, 2 cucharadas de aceite y sal",
+    steps:["Precalienta el horno a 200 °C.","Corta las patatas en gajos y las verduras en trozos grandes. Ponlas en una bandeja con la mitad del aceite, ajo y sal.","Hornea 20 minutos.","Añade el pollo con sal, orégano y el resto del aceite. Hornea 25 minutos más, dándole la vuelta a mitad."]},
+  albondigas:{n:"Albóndigas de pavo en salsa de tomate",pool:"m",cat:"car",t:"40 min",r:"2 raciones",base:"#C24B33",em:["🧆","🍅"],
+    ing:[["pavo","300 g picado"],["pan","1 rebanada"],["huevos","1"],["tomateTri","400 g"],["cebolla","1"]],basic:"1 diente de ajo, perejil, 1 cucharada de aceite y sal",
+    steps:["Remoja el pan en un poco de agua y escúrrelo.","Mezcla el pavo con el pan, el huevo, ajo y perejil picados y sal. Forma bolitas.","Dóralas en una sartén antiadherente con el aceite 5 minutos. Sácalas.","Sofríe la cebolla picada 5 minutos, añade el tomate y cocina 5 minutos.","Mete las albóndigas en la salsa y cuece tapado 12 minutos."],
+    tip:"Con pavo en vez de ternera o cerdo tienen mucha menos grasa saturada."},
+  sopaFideos:{n:"Sopa de fideos con pollo",pool:"m",cat:"car",t:"30 min",r:"2 raciones",base:"#E7C56A",em:["🍜","🥕"],
+    ing:[["fideos","80 g"],["pollo","150 g"],["zanahoria","1"],["cebolla","½"]],basic:"Laurel, perejil y sal",
+    steps:["Pon en una olla 1 litro de agua con el pollo, la zanahoria, la cebolla, el laurel y sal.","Cuece 20 minutos a fuego suave. Saca el pollo y desmígalo.","Añade los fideos al caldo y cuece el tiempo del paquete.","Vuelve a echar el pollo desmigado y añade perejil."]},
+
+  /* Huevos */
+  tortillaEspinacas:{n:"Tortilla de espinacas",pool:"m",cat:"hue",t:"15 min",r:"1 ración",base:"#E8C95A",em:["🥬","🥚"],
+    ing:[["huevos","2"],["espinacas","150 g"],["cebolla","¼"],["pan","1 rebanada"]],basic:"1 cucharada de aceite y sal",
+    steps:["Pica la cebolla y póchala con el aceite en una sartén pequeña 4 minutos.","Añade las espinacas y deja que se reduzcan 2–3 minutos.","Bate los huevos con sal y mézclalos con las espinacas.","Cuaja la tortilla a fuego medio-bajo 2–3 minutos por cada lado. Acompaña con el pan."]},
+  tortillaPatata:{n:"Tortilla de patata con poco aceite",pool:"m",cat:"hue",t:"30 min",r:"2 raciones",base:"#EBC86A",em:["🥔","🥚","🧅"],
+    ing:[["patata","2 medianas"],["cebolla","½"],["huevos","3"]],basic:"2 cucharadas de aceite y sal",
+    steps:["Pela las patatas y córtalas en láminas finas. Pica la cebolla.","Ponlas en una sartén antiadherente con 1 cucharada de aceite y sal, tapada, a fuego bajo 15–18 minutos, removiendo de vez en cuando, hasta que estén tiernas.","Bate los huevos con sal y mézclalos con la patata y la cebolla.","Calienta la otra cucharada de aceite en la sartén y echa la mezcla. Cuaja 4 minutos a fuego medio-bajo.","Dale la vuelta con un plato y deja 3 minutos más por el otro lado."],
+    tip:"Así la patata se hace tapada en lugar de freírse en mucho aceite. La otra mitad aguanta 2 días en la nevera."},
+  tortillaCalabacin:{n:"Tortilla de calabacín",pool:"m",cat:"hue",t:"20 min",r:"1 ración",base:"#E3CB6A",em:["🥒","🥚"],
+    ing:[["huevos","2"],["calabacin","1"],["cebolla","¼"]],basic:"1 cucharada de aceite y sal",
+    steps:["Corta el calabacín en dados pequeños y la cebolla picada.","Póchalos con el aceite y sal en una sartén pequeña, tapada, 10 minutos.","Bate los huevos, mézclalos con la verdura y cuaja la tortilla 2–3 minutos por cada lado."]},
+  revueltoChamp:{n:"Revuelto de champiñones y espinacas",pool:"m",cat:"hue",t:"12 min",r:"1 ración",base:"#EBD27A",em:["🍄","🥬","🥚"],
+    ing:[["huevos","2"],["champis","125 g"],["espinacas","100 g"],["pan","1 rebanada"]],basic:"1 diente de ajo, 1 cucharada de aceite y sal",
+    steps:["Saltea el ajo y los champiñones laminados con el aceite 4 minutos.","Añade las espinacas y deja que se reduzcan.","Echa los huevos batidos con sal y remueve a fuego bajo hasta que cuajen jugosos.","Sírvelo con el pan tostado."]},
+  huevosTomate:{n:"Huevos al plato con tomate y pimiento",pool:"m",cat:"hue",t:"20 min",r:"1 ración",base:"#C9503A",em:["🍳","🫑"],
+    ing:[["huevos","2"],["tomateTri","200 g"],["pimiento","½"],["cebolla","¼"],["pan","1 rebanada"]],basic:"1 diente de ajo, comino, pimentón, 1 cucharada de aceite y sal",
+    steps:["Sofríe la cebolla, el ajo y el pimiento picados con el aceite 6 minutos.","Añade el tomate, el comino y el pimentón y cocina 6 minutos hasta que espese.","Haz dos huecos en la salsa, casca los huevos dentro y tapa.","Deja 4–5 minutos a fuego bajo, hasta que cuaje la clara. Mójalo con el pan."]},
+
+  /* Verduras */
+  crema:{n:"Crema de calabacín",pool:"m",cat:"ver",t:"25 min",r:"2 raciones",base:"#9CBD66",em:["🥚"],
+    ing:[["calabacin","2"],["patata","1 pequeña"],["cebolla","½"],["huevos","1 (para el huevo cocido)"]],basic:"1 cucharada de aceite y sal",
+    steps:["Pica la cebolla y póchala en una olla con el aceite 5 minutos.","Añade el calabacín con piel y la patata en trozos. Cubre justo con agua y sala.","Cuece 15 minutos y tritura con la batidora. Si queda espesa, añade un poco del agua de cocción.","Huevo cocido: 10 minutos en agua hirviendo, luego a agua fría y pelar."],
+    tip:"Cremosa sin nata ni quesitos: la patata ya la espesa."},
+  cremaZanahoria:{n:"Crema de zanahoria",pool:"m",cat:"ver",t:"25 min",r:"2 raciones",base:"#E98B3A",em:["🥕"],
+    ing:[["zanahoria","4"],["patata","1 pequeña"],["cebolla","½"]],basic:"1 cucharada de aceite, comino y sal",
+    steps:["Pica la cebolla y póchala con el aceite en una olla 5 minutos.","Añade la zanahoria y la patata en trozos y cubre justo con agua. Sala.","Cuece 18–20 minutos, hasta que la zanahoria esté tierna.","Tritura con la batidora y añade una pizca de comino."]},
+  cremaCalabaza:{n:"Crema de calabaza",pool:"m",cat:"ver",t:"25 min",r:"2 raciones",base:"#E8902F",em:["🎃"],
+    ing:[["calabaza","500 g"],["cebolla","½"],["zanahoria","1"]],basic:"1 cucharada de aceite, una pizca de comino o nuez moscada y sal",
+    steps:["Pica la cebolla y póchala con el aceite 5 minutos.","Añade la calabaza pelada y la zanahoria en trozos. Cubre justo con agua y sala.","Cuece 15 minutos y tritura.","Sírvela con unas pipas o un chorrito de aceite crudo por encima."]},
+  pisto:{n:"Pisto con huevo",pool:"m",cat:"ver",t:"35 min",r:"2 raciones",base:"#C55A3A",em:["🥒","🫑","🍳"],
+    ing:[["calabacin","1"],["pimiento","1"],["cebolla","1"],["tomateTri","400 g"],["huevos","2"]],basic:"1 diente de ajo, 2 cucharadas de aceite y sal",
+    steps:["Pica la cebolla, el ajo, el pimiento y el calabacín en dados.","Póchalos con el aceite a fuego medio 15 minutos, en ese orden, añadiendo cada verdura cuando la anterior se ablande.","Añade el tomate y cocina 10 minutos más.","Sirve cada ración con un huevo a la plancha encima."]},
+  brocoliPatata:{n:"Brócoli con patata y ajo",pool:"m",cat:"ver",t:"20 min",r:"1 ración",base:null,em:["🥦","🥔"],
+    ing:[["brocoli","½"],["patata","1"]],basic:"2 dientes de ajo, pimentón, 1 cucharada de aceite y sal",
+    steps:["Cuece la patata en trozos en agua con sal 10 minutos. Añade el brócoli en ramitos y cuece 5 minutos más.","Escurre.","Dora el ajo laminado en el aceite, apártalo del fuego y añade una pizca de pimentón.","Riega la verdura con ese aceite."]},
+  judiasPatata:{n:"Judías verdes con patata y huevo",pool:"m",cat:"ver",t:"25 min",r:"1 ración",base:null,em:["🫛","🥔","🥚"],
+    ing:[["judias","250 g"],["patata","1"],["huevos","1"]],basic:"1 diente de ajo, 1 cucharada de aceite y sal",
+    steps:["Cuece la patata en trozos y las judías en agua con sal 15 minutos. Cuece el huevo aparte 10 minutos.","Escurre la verdura.","Rehógala 2 minutos con el ajo laminado y el aceite.","Sírvela con el huevo cocido en cuartos."]},
+  sopaVerduras:{n:"Sopa de verduras con fideos",pool:"m",cat:"ver",t:"30 min",r:"2 raciones",base:"#D7C27A",em:["🥕","🥒","🍜"],
+    ing:[["zanahoria","2"],["calabacin","1"],["cebolla","1"],["patata","1"],["fideos","40 g"]],basic:"1 cucharada de aceite, laurel y sal",
+    steps:["Corta todas las verduras en dados pequeños.","Rehógalas con el aceite 5 minutos.","Cubre con 1 litro de agua, añade laurel y sal y cuece 15 minutos.","Añade los fideos y cuece el tiempo del paquete."]},
+
+  /* Pasta, arroz y cuscús */
+  pasta:{n:"Pasta integral con tomate y caballa",pool:"m",cat:"pas",t:"20 min",r:"1 ración",base:"#C9573E",em:["🍝","🐟"],
+    ing:[["pasta","80 g"],["calabacin","½"],["cebolla","¼"],["tomateTri","200 g"],["caballa","1 lata (o atún)"]],basic:"1 diente de ajo, orégano, 1 cucharada de aceite y sal",
+    steps:["Cuece la pasta en agua con sal el tiempo que diga el paquete, unos 10–12 minutos.","Mientras, sofríe la cebolla y el ajo picados en el aceite 3 minutos. Añade el calabacín en dados y saltea 5 minutos.","Echa el tomate y el orégano y deja que se reduzca 5 minutos.","Apaga el fuego, añade la caballa escurrida y desmigada y mézclalo con la pasta escurrida."],
+    tip:"Sin queso rallado por encima: es grasa saturada. Si lo echas de menos, prueba con orégano o una pizca de guindilla."},
+  pastaVerduras:{n:"Pasta integral con verduras",pool:"m",cat:"pas",t:"20 min",r:"1 ración",base:"#C9573E",em:["🍝","🫑"],
+    ing:[["pasta","80 g"],["tomateTri","200 g"],["pimiento","½"],["calabacin","½"],["cebolla","¼"]],basic:"1 diente de ajo, orégano, 1 cucharada de aceite y sal",
+    steps:["Cuece la pasta en agua con sal el tiempo que diga el paquete.","Sofríe la cebolla y el ajo picados en el aceite 3 minutos.","Añade el pimiento y el calabacín en dados y saltea 6 minutos.","Echa el tomate y el orégano, deja que se reduzca 5 minutos y mézclalo con la pasta escurrida."]},
+  pastaAtun:{n:"Pasta integral con atún y tomate",pool:"m",cat:"pas",t:"20 min",r:"1 ración",base:"#C9573E",em:["🍝","🐟"],
+    ing:[["pasta","80 g"],["atun","1 lata"],["tomateTri","200 g"],["cebolla","¼"]],basic:"1 diente de ajo, orégano, 1 cucharada de aceite y sal",
+    steps:["Cuece la pasta el tiempo del paquete.","Sofríe la cebolla y el ajo picados con el aceite 4 minutos.","Añade el tomate y el orégano y cocina 6 minutos.","Mezcla con el atún escurrido y la pasta."]},
+  pastaBrocoli:{n:"Pasta integral con brócoli y ajo",pool:"m",cat:"pas",t:"20 min",r:"1 ración",base:"#D6C59A",em:["🍝","🥦"],
+    ing:[["pasta","80 g"],["brocoli","½"]],basic:"2 dientes de ajo, una pizca de guindilla si te gusta, 1 cucharada de aceite y sal",
+    steps:["Cuece la pasta en agua con sal. A falta de 4 minutos, añade el brócoli en ramitos pequeños a la misma olla.","Mientras, dora el ajo laminado y la guindilla en el aceite a fuego bajo.","Escurre la pasta y el brócoli y saltéalos 1 minuto con el aceite de ajo."]},
+  bolonesaLentejas:{n:"Macarrones con boloñesa de lentejas",pool:"m",cat:"pas",t:"45 min",r:"2 raciones",base:"#B4492F",em:["🍝","🥕"],
+    ing:[["pasta","160 g"],["lentejas","100 g"],["tomateTri","400 g"],["cebolla","1"],["zanahoria","1"]],basic:"1 diente de ajo, orégano, 2 cucharadas de aceite y sal",
+    steps:["Cuece las lentejas en agua 20 minutos y escúrrelas.","Sofríe la cebolla, el ajo y la zanahoria muy picados con el aceite 8 minutos.","Añade el tomate, el orégano y las lentejas. Cocina 15 minutos a fuego suave.","Cuece la pasta y mézclala con la salsa."],
+    tip:"Sabe como una boloñesa de carne, pero con fibra y sin grasa saturada."},
+  arrozVerduras:{n:"Arroz salteado con verduras y huevo",pool:"m",cat:"pas",t:"25 min",r:"1 ración",base:"#EDD9A0",em:["🥕","🥚","🫑"],
+    ing:[["arroz","75 g"],["zanahoria","1"],["pimiento","½"],["calabacin","½"],["huevos","1"]],basic:"1 cucharada de aceite y sal",
+    steps:["Cuece el arroz en agua con sal 18 minutos y escúrrelo.","Mientras, corta la zanahoria, el pimiento y el calabacín en dados y saltéalos con el aceite 8 minutos.","Aparta las verduras a un lado de la sartén, echa el huevo batido en el hueco y remuévelo hasta que cuaje.","Añade el arroz, mézclalo todo y saltea 2 minutos."]},
+  arrozChamp:{n:"Arroz con champiñones y espinacas",pool:"m",cat:"pas",t:"30 min",r:"1 ración",base:"#D9C79A",em:["🍄","🥬"],
+    ing:[["arroz","75 g"],["champis","150 g"],["espinacas","100 g"],["cebolla","¼"]],basic:"1 diente de ajo, 1 cucharada de aceite y sal",
+    steps:["Sofríe la cebolla y el ajo picados con el aceite 4 minutos.","Añade los champiñones laminados y saltea 5 minutos.","Echa el arroz, remueve y añade 250 ml de agua caliente con sal. Cuece 16 minutos.","Añade las espinacas, tapa y deja reposar 4 minutos."]},
+  arrozTomateHuevo:{n:"Arroz con tomate y huevo",pool:"m",cat:"pas",t:"25 min",r:"1 ración",base:"#EADBA8",em:["🍚","🍳","🍅"],
+    ing:[["arroz","75 g"],["tomateTri","150 g"],["huevos","1"]],basic:"1 diente de ajo, 1 cucharada de aceite y sal",
+    steps:["Cuece el arroz en agua con sal 18 minutos.","Mientras, sofríe el ajo y el tomate con media cucharada de aceite 8 minutos.","Haz el huevo a la plancha con unas gotas de aceite.","Sirve el arroz con el tomate y el huevo encima."]},
+  ensaladaArroz:{n:"Ensalada de arroz con atún y maíz",pool:"m",cat:"pas",t:"25 min",r:"1 ración",base:null,em:["🍚","🌽","🐟"],
+    ing:[["arroz","70 g"],["atun","1 lata"],["maiz","½ lata"],["tomate","1"],["pimiento","¼"]],basic:"Aceite, vinagre y sal",
+    steps:["Cuece el arroz 18 minutos, escúrrelo y pásalo por agua fría.","Pica el tomate y el pimiento.","Mézclalo todo con el atún y el maíz escurridos y aliña."]},
+  ensaladaPasta:{n:"Ensalada de pasta con atún y maíz",pool:"m",cat:"pas",t:"20 min",r:"1 ración",base:null,em:["🍝","🌽","🐟"],
+    ing:[["pasta","80 g"],["atun","1 lata"],["maiz","½ lata"],["tomate","1"]],basic:"Aceite, vinagre, orégano y sal",
+    steps:["Cuece la pasta, escúrrela y pásala por agua fría.","Trocea el tomate.","Mézclalo todo con el atún y el maíz escurridos y aliña."]},
+  cuscusVerduras:{n:"Cuscús con verduras y garbanzos",pool:"m",cat:"pas",t:"20 min",r:"1 ración",base:"#E8CF7A",em:["🥕","🫑","🥒"],
+    ing:[["cuscus","70 g"],["garbanzos","½ bote"],["calabacin","½"],["pimiento","½"],["zanahoria","1"]],basic:"Comino, 1 cucharada de aceite y sal",
+    steps:["Pon el cuscús en un bol con sal y un chorrito de aceite. Cúbrelo con el mismo volumen de agua hirviendo, tapa y espera 5 minutos.","Saltea la zanahoria, el pimiento y el calabacín en dados con el aceite 8 minutos.","Añade los garbanzos enjuagados y el comino y saltea 2 minutos.","Suelta el cuscús con un tenedor y mézclalo con las verduras."]},
+};
+
+/* ---------- Menú (índice 0 = lunes; d = desayuno, c = comida, n = cena) ---------- */
+const DAYS = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+const MEALS = {d:"Desayuno",c:"Comida",n:"Cena"};
+const MENU_BASE = [
+  {d:{r:"avena"}, c:{r:"lentejas"}, n:{r:"merluzaHorno"}},
+  {d:{r:"tostada"}, c:{r:"lentejas",sobras:true,extra:"+ ensalada de lechuga y tomate",need:["lechuga","tomate"]}, n:{r:"crema",extra:"+ 1 huevo cocido"}},
+  {d:{r:"yogur"}, c:{r:"arroz"}, n:{r:"caballaTostada"}},
+  {d:{r:"avena"}, c:{r:"garbanzos"}, n:{r:"pasta"}},
+  {d:{r:"tostada"}, c:{r:"garbanzos",sobras:true}, n:{r:"merluzaPlancha",extra:"+ crema de calabacín (sobras)"}},
+  {d:{r:"sabado"}, c:{fuera:true}, n:{fuera:true}},
+  {d:{r:"domingo"}, c:{fuera:true}, n:{fuera:true}},
+];
+const clone = (o) => JSON.parse(JSON.stringify(o));
+function cleanSlot(s){
+  if (!s || typeof s !== "object") return null;
+  if (s.fuera) return {fuera:true};
+  if (!R[s.r]) return null;
+  const o = {r:s.r};
+  if (s.sobras) o.sobras = true;
+  if (typeof s.extra === "string") o.extra = s.extra;
+  if (Array.isArray(s.need)) o.need = s.need.filter(k=>ING[k]);
+  return o;
+}
+function cleanMenu(m){
+  if (!Array.isArray(m) || m.length !== 7) return null;
+  const out = m.map((day,i)=>({d:cleanSlot(day&&day.d)||clone(MENU_BASE[i].d), c:cleanSlot(day&&day.c)||clone(MENU_BASE[i].c), n:cleanSlot(day&&day.n)||clone(MENU_BASE[i].n)}));
+  return out;
+}
+
+/* ---------- Estado ---------- */
+let have = new Set();
+let menu = clone(MENU_BASE);
+let view = "ahora", filter = "all", override = null, confirmReset = false, confirmMenu = false, ideasAll = false;
+const LS = "micocina.despensa", LSM = "micocina.menu";
+try { const s = JSON.parse(localStorage.getItem(LS) || "null"); if (Array.isArray(s)) have = new Set(s.filter(k => ING[k])); } catch(e) {}
+try { const m = cleanMenu(JSON.parse(localStorage.getItem(LSM) || "null")); if (m) menu = m; } catch(e) {}
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const eur = (n) => n.toLocaleString("es-ES",{minimumFractionDigits:2,maximumFractionDigits:2}) + " €";
+const lower = (s) => s.charAt(0).toLowerCase() + s.slice(1);
+
+function plate(rid){
+  const d = R[rid];
+  const pos = {1:[[100,108,64]],2:[[78,96,50],[124,118,46]],3:[[74,86,42],[128,92,40],[100,134,40]]}[d.em.length];
+  const em = d.em.map((e,i)=>`<text x="${pos[i][0]}" y="${pos[i][1]}" font-size="${pos[i][2]}" text-anchor="middle" dominant-baseline="middle">${e}</text>`).join("");
+  return `<svg viewBox="0 0 200 200" role="img" aria-label="${esc(d.n)}">
+    <circle cx="100" cy="104" r="94" fill="rgba(0,0,0,.06)"/>
+    <circle cx="100" cy="100" r="94" fill="var(--plate)" stroke="var(--plate-rim)" stroke-width="3"/>
+    <circle cx="100" cy="100" r="70" fill="none" stroke="var(--plate-rim)" stroke-width="2"/>
+    ${d.base?`<circle cx="100" cy="100" r="62" fill="${d.base}"/><circle cx="82" cy="78" r="16" fill="#fff" opacity=".16"/>`:""}
+    ${em}</svg>`;
+}
+function outPlate(){
+  return `<svg viewBox="0 0 200 200" role="img" aria-label="Comes fuera"><circle cx="100" cy="100" r="94" fill="var(--plate)" stroke="var(--plate-rim)" stroke-width="3"/><circle cx="100" cy="100" r="70" fill="none" stroke="var(--plate-rim)" stroke-width="2" stroke-dasharray="6 8"/><text x="100" y="104" font-size="62" text-anchor="middle" dominant-baseline="middle">🍽️</text></svg>`;
+}
+
+function slotIngs(slot){
+  if (!slot || slot.fuera) return [];
+  return slot.sobras ? (slot.need || []) : R[slot.r].ing.map(x=>x[0]);
+}
+function missingFor(slot){ return slotIngs(slot).filter(id => !have.has(id)); }
+function missingRecipe(rid){ return R[rid].ing.map(x=>x[0]).filter(id=>!have.has(id)); }
+function menuIngs(){
+  const s = new Set();
+  menu.forEach(day => ["d","c","n"].forEach(m => slotIngs(day[m]).forEach(i=>s.add(i))));
+  return Object.keys(ING).filter(i=>s.has(i));
+}
+
+function nowInfo(){
+  const d = new Date();
+  const dayIdx = (d.getDay()+6)%7;
+  const h = d.getHours() + d.getMinutes()/60;
+  let m, label;
+  if (h < 6) { m="d"; label="Próximo: desayuno"; }
+  else if (h < 11.5) { m="d"; label="Toca desayunar"; }
+  else if (h < 16.5) { m="c"; label="Toca comer"; }
+  else if (h < 20) { m="n"; label="Esta noche cenas"; }
+  else { m="n"; label="Toca cenar"; }
+  return {dayIdx, m, label, d};
+}
+
+/* ---------- Ahora ---------- */
+function chip(id){ return `<span class="chip"><span class="ic">${icon(id)}</span>${esc(ING[id].n)}</span>`; }
+function smallRow(rid, note, cls){
+  return `<button class="alt" data-open="${rid}">${plate(rid)}<span><b>${esc(R[rid].n)}</b><small>${esc(note)}</small></span></button>`;
+}
+
+function renderNow(){
+  const ni = nowInfo();
+  const sel = override || {dayIdx: ni.dayIdx, m: ni.m};
+  const isNow = !override || (override.dayIdx===ni.dayIdx && override.m===ni.m);
+  $("greet").textContent = isNow ? ni.label : `${MEALS[sel.m]} del ${DAYS[sel.dayIdx].toLowerCase()}`;
+  $("dayLabel").textContent = DAYS[sel.dayIdx] + (sel.dayIdx===ni.dayIdx ? " · hoy" : "");
+  ["d","c","n"].forEach(k => $("m-"+k).setAttribute("aria-pressed", String(sel.m===k)));
+  const slot = menu[sel.dayIdx][sel.m];
+  let html = "", shown = slot.fuera ? [] : [slot.r];
+  const editBtn = `<button class="linkbtn" data-slot="${sel.dayIdx}-${sel.m}">Cambiar este plato en el menú</button>`;
+  if (slot.fuera){
+    html = `<div class="hero"><div style="width:min(200px,60%);margin:0 auto">${outPlate()}</div>
+      <div><div class="dishname">Hoy comes fuera</div><div class="extra">${esc(MEALS[sel.m])} del ${DAYS[sel.dayIdx].toLowerCase()}: no hay nada que cocinar. Si al final comes en casa, abajo tienes ideas con lo que tienes.</div></div>
+      <div style="text-align:center">${editBtn}</div></div>`;
+  } else if (!slot.sobras && missingFor(slot).length){
+    const r = R[slot.r], miss = missingFor(slot);
+    const ranked = Object.keys(R).filter(k=>R[k].pool===r.pool && k!==slot.r)
+      .map(k=>({k, miss:missingRecipe(k)})).sort((a,b)=>a.miss.length-b.miss.length);
+    const pick = ranked[0] && ranked[0].miss.length < miss.length ? ranked[0] : null;
+    const planned = `<div class="status"><span class="eyebrow">Lo previsto era</span>
+      ${smallRow(slot.r, "Te falta: " + miss.map(i=>ING[i].n.toLowerCase()).join(", "))}</div>`;
+    if (pick){
+      const p = R[pick.k], ok = !pick.miss.length;
+      html = `<div class="hero">
+        <div style="text-align:center"><span class="pill${ok?"":" miss"}">${ok?"✓ Puedes hacerlo con lo que tienes":`Lo más cercano: te falta ${pick.miss.length}`}</span></div>
+        <button class="platebtn" data-open="${pick.k}" aria-label="Ver receta de ${esc(p.n)}">${plate(pick.k)}</button>
+        <div class="tap">Toca el plato para ver la receta paso a paso</div>
+        <div><div class="dishname">${esc(p.n)}</div><div class="extra">En lugar de ${esc(lower(r.n))}</div></div>
+        <div class="meta"><span class="pill plain">⏱ ${p.t}</span><span class="pill plain">${esc(p.r)}</span></div>
+        ${ok?"":`<div class="status"><span class="eyebrow">Para este te falta</span><div class="chips">${pick.miss.map(chip).join("")}</div></div>`}
+        ${planned}<div style="text-align:center">${editBtn}</div></div>`;
+      shown = [slot.r, pick.k];
+    } else {
+      html = `<div class="hero">
+        <button class="platebtn" data-open="${slot.r}" aria-label="Ver receta de ${esc(r.n)}">${plate(slot.r)}</button>
+        <div class="tap">Toca el plato para ver la receta paso a paso</div>
+        <div><div class="dishname">${esc(r.n)}</div>${slot.extra?`<div class="extra">${esc(slot.extra)}</div>`:""}</div>
+        <div class="meta"><span class="pill miss">Te faltan ${miss.length} de ${r.ing.length}</span><span class="pill plain">⏱ ${r.t}</span></div>
+        <div class="status"><span class="eyebrow">Te falta comprar</span><div class="chips">${miss.map(chip).join("")}</div>
+        <p class="legend" style="margin:4px 0 0">Con lo que tienes marcado no sale ningún plato del recetario. Marca en Compra lo que tengas en casa.</p></div>
+        <div style="text-align:center">${editBtn}</div></div>`;
+    }
+  } else {
+    const r = R[slot.r];
+    const miss = missingFor(slot);
+    let status;
+    if (slot.sobras && miss.length===0) status = `<span class="pill">Sobras: solo calentar</span>`;
+    else if (miss.length===0) status = `<span class="pill">✓ Tienes todos los ingredientes</span>`;
+    else status = `<span class="pill miss">Te faltan ${miss.length}</span>`;
+    html = `<div class="hero">
+      <button class="platebtn" data-open="${slot.r}" aria-label="Ver receta de ${esc(r.n)}">${plate(slot.r)}</button>
+      <div class="tap">Toca el plato para ver la receta paso a paso</div>
+      <div><div class="dishname">${esc(r.n)}${slot.sobras?" <span style='color:var(--muted);font-weight:500'>(sobras)</span>":""}</div>${slot.extra?`<div class="extra">${esc(slot.extra)}</div>`:""}</div>
+      <div class="meta">${status}<span class="pill plain">⏱ ${slot.sobras?"5 min":r.t}</span><span class="pill plain">${esc(r.r)}</span></div>
+      ${miss.length?`<div class="status"><span class="eyebrow">Te falta comprar</span><div class="chips">${miss.map(chip).join("")}</div></div>`:""}
+      <div style="text-align:center">${editBtn}</div></div>`;
+  }
+  html += ideasBox(slot.fuera ? "m" : R[slot.r].pool, shown, slot.fuera);
+  html += `<div style="text-align:center;margin-top:10px">${isNow?"":`<button class="backnow" id="backNow">Volver a lo que toca ahora</button>`}</div>`;
+  $("nowBox").innerHTML = html;
+}
+function ideaCard(a){
+  const r = R[a.k];
+  const note = a.miss.length ? `Falta: ${a.miss.map(i=>ING[i].n.toLowerCase()).join(", ")}` : `⏱ ${r.t} · ${r.r}`;
+  return `<button class="idea${a.miss.length?" near":""}" data-open="${a.k}">${plate(a.k)}<b>${esc(r.n)}</b><small>${esc(note)}</small></button>`;
+}
+function ideasBox(pool, exclude, fuera){
+  const all = Object.keys(R).filter(k=>R[k].pool===pool && !exclude.includes(k)).map(k=>({k, miss:missingRecipe(k)}));
+  const can = all.filter(a=>!a.miss.length);
+  const near = all.filter(a=>a.miss.length===1);
+  const one = pool==="d" ? "desayuno" : "plato", many = pool==="d" ? "desayunos" : "platos";
+  const LIM = 6;
+  let h = `<section class="ideas"><h3>${fuera?"Si comes en casa, puedes hacer":"¿Te apetece otra cosa?"}</h3>`;
+  if (can.length){
+    const list = ideasAll ? can : can.slice(0, LIM);
+    h += `<p class="legend">Con lo que tienes en casa puedes hacer ${can.length} ${can.length===1?one:many}:</p><div class="igrid">${list.map(ideaCard).join("")}</div>`;
+    if (can.length > LIM) h += `<button class="btn showall" id="ideasMore">${ideasAll?"Ver menos":`Ver los ${can.length}`}</button>`;
+  } else {
+    h += `<p class="legend">Con lo que tienes marcado no sale ningún otro ${one} completo.</p>`;
+  }
+  if (near.length){
+    const list = ideasAll ? near : near.slice(0, LIM);
+    h += `<h3 style="margin-top:16px;font-size:.95rem">Te falta solo 1 cosa (${near.length})</h3><div class="igrid">${list.map(ideaCard).join("")}</div>`;
+    if (near.length > LIM && !(can.length > LIM)) h += `<button class="btn showall" id="ideasMore">${ideasAll?"Ver menos":`Ver los ${near.length}`}</button>`;
+  }
+  return h + `</section>`;
+}
+
+/* ---------- Semana ---------- */
+function renderWeek(){
+  const today = nowInfo().dayIdx;
+  $("weekBox").innerHTML = menu.map((day,i)=>`<div class="day${i===today?" today":""}"><header><h3>${DAYS[i]}</h3>${i===today?`<span class="pill">Hoy</span>`:""}</header>
+    <div class="meals">${["d","c","n"].map(m=>{
+      const s = day[m];
+      if (s.fuera) return `<button class="meal" data-slot="${i}-${m}" aria-label="${MEALS[m]} del ${DAYS[i]}: fuera. Cambiar"><span class="k">${MEALS[m]}</span>${outPlate()}<span class="n">Fuera</span><span class="edit">Cambiar</span></button>`;
+      return `<button class="meal" data-slot="${i}-${m}" aria-label="${MEALS[m]} del ${DAYS[i]}: ${esc(R[s.r].n)}. Cambiar"><span class="k">${MEALS[m]}</span>${plate(s.r)}<span class="n">${esc(R[s.r].n)}${s.sobras?" (sobras)":""}</span><span class="edit">Cambiar</span></button>`;
+    }).join("")}</div></div>`).join("");
+  $("menuResetBox").innerHTML = confirmMenu
+    ? `<span>¿Volver al menú original de la semana?</span><button class="btn danger" id="menuYes">Sí, restablecer</button><button class="btn" id="menuNo">Cancelar</button>`
+    : `<button class="btn" id="menuAsk">Restablecer el menú original</button>`;
+}
+
+/* ---------- Compra ---------- */
+function tile(i){
+  const on = have.has(i);
+  return `<button class="tile" data-toggle="${i}" aria-pressed="${on}" aria-label="${esc(ING[i].n)}: ${on?"en casa":"por comprar"}">
+    <span class="mark">✓</span><span class="ic">${icon(i)}</span><span class="n">${esc(ING[i].n)}</span><span class="q">${esc(ING[i].q)} · ${eur(ING[i].p)}</span></button>`;
+}
+function groupBySec(ids){
+  let html = "";
+  for (const s of Object.keys(SEC)){
+    const list = ids.filter(i=>ING[i].s===s);
+    if (list.length) html += `<h3 class="sec">${SEC[s]}</h3><div class="grid">${list.map(tile).join("")}</div>`;
+  }
+  return html;
+}
+function renderShop(){
+  const need = menuIngs();
+  const buy = need.filter(i=>!have.has(i));
+  $("nBuy").textContent = buy.length;
+  $("eBuy").textContent = `por comprar para tu menú · unos ${eur(buy.reduce((s,i)=>s+ING[i].p,0))}`;
+  $("nHave").textContent = have.size;
+  $("tabBadge").textContent = buy.length || "";
+  $("tabBadge").hidden = !buy.length;
+  ["all","buy","have"].forEach(k=>$("f-"+k).setAttribute("aria-pressed", String(filter===k)));
+  const shown = need.filter(i => filter==="all" || (filter==="buy" ? !have.has(i) : have.has(i)));
+  $("shopBox").innerHTML = shown.length ? groupBySec(shown)
+    : `<p class="legend" style="margin-top:16px">${filter==="buy"?"No te falta nada para tu menú: lo tienes todo en casa.":"Todavía no has marcado nada de tu menú como «en casa»."}</p>`;
+  const others = Object.keys(ING).filter(i=>!need.includes(i));
+  $("moreGrid").innerHTML = groupBySec(others);
+  $("resetBox").innerHTML = confirmReset
+    ? `<span>¿Desmarcar todo y empezar la lista de cero?</span><button class="btn danger" id="resetYes">Sí, desmarcar</button><button class="btn" id="resetNo">Cancelar</button>`
+    : `<button class="btn primary" id="allHave">He comprado lo del menú</button><button class="btn" id="resetAsk">Nueva semana: desmarcar todo</button>`;
+}
+
+function renderAll(){
+  renderNow(); renderWeek(); renderShop();
+  const ni = nowInfo();
+  $("clock").innerHTML = `${DAYS[ni.dayIdx]}<br>${ni.d.toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"})}`;
+}
+function show(v){
+  view = v;
+  ["ahora","semana","compra"].forEach(k=>{ $("v-"+k).hidden = k!==v; $("t-"+k).setAttribute("aria-selected", String(k===v)); });
+  window.scrollTo(0,0);
+}
+
+/* ---------- Hoja: receta y selector de plato ---------- */
+let mode = null, cur = null, stepI = 0, showAll = false, pick = null, pickCat = "all", pickQ = "", backToPick = false;
+function openSheet(){ $("sheet").hidden = false; document.body.style.overflow="hidden"; $("panel").scrollTop = 0; }
+function closeSheet(){
+  if (mode==="recipe" && backToPick && pick){ backToPick = false; mode = "pick"; renderPicker(); return; }
+  $("sheet").hidden = true; mode = null; cur = null; pick = null; backToPick = false; document.body.style.overflow="";
+}
+function openRecipe(rid, fromPick){ mode="recipe"; cur = rid; stepI = 0; showAll = false; backToPick = !!fromPick; openSheet(); renderRecipe(); $("panel").querySelector(".close").focus(); }
+function renderRecipe(){
+  const r = R[cur]; const n = r.steps.length;
+  const ings = r.ing.map(([id,amt])=>{ const on = have.has(id);
+    return `<li><button data-toggle="${id}" aria-pressed="${on}"><span class="ic">${icon(id)}</span><span class="amt"><b>${esc(ING[id].n)}</b><br><small style="color:var(--muted)">${esc(amt)}</small></span><span class="st ${on?"ok":"no"}">${on?"✓ En casa":"Comprar"}</span></button></li>`; }).join("");
+  const last = stepI===n-1;
+  const steps = showAll
+    ? `<ol class="allsteps">${r.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol>`
+    : `<div class="step"><div class="eyebrow">Paso ${stepI+1} de ${n}</div><div class="prog">${r.steps.map((_,i)=>`<i class="${i<=stepI?"on":""}"></i>`).join("")}</div>
+        <p class="txt">${esc(r.steps[stepI])}</p>
+        <div class="stepnav"><button class="btn" id="stPrev" ${stepI===0?"disabled":""}>‹ Anterior</button>${last?`<button class="btn primary" id="stDone">¡Listo!</button>`:`<button class="btn primary" id="stNext">Siguiente ›</button>`}</div></div>`;
+  $("panel").innerHTML = `<button class="close" id="rClose" aria-label="${backToPick?"Volver":"Cerrar receta"}">${backToPick?"‹":"✕"}</button>
+    <div class="head">${plate(cur)}<h2 id="rTitle">${esc(r.n)}</h2><div class="meta"><span class="pill plain">⏱ ${r.t}</span><span class="pill plain">${esc(r.r)}</span></div></div>
+    ${backToPick?`<div style="text-align:center;margin-top:10px"><button class="btn primary" data-pick="${cur}">Poner en el menú</button></div>`:""}
+    <h3 style="margin-top:16px">Ingredientes</h3><ul class="ings">${ings}</ul>
+    ${r.basic?`<p class="ings basic">Y de casa: ${esc(lower(r.basic))}.</p>`:""}
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:16px"><h3>Preparación</h3><button class="linkbtn" id="stAll">${showAll?"Paso a paso":"Ver todos los pasos"}</button></div>
+    ${steps}${r.tip && (showAll||last)?`<p class="tip">${esc(r.tip)}</p>`:""}`;
+}
+
+function openPicker(i, m){ mode="pick"; pick = {i:+i, m}; pickCat = "all"; pickQ = ""; openSheet(); renderPicker(); }
+function renderPicker(){
+  const {i, m} = pick; const slot = menu[i][m]; const pool = m==="d" ? "d" : "m";
+  const prevDay = menu[(i+6)%7][m];
+  const canSobras = i>0 && prevDay && !prevDay.fuera && !prevDay.sobras && /2 raciones/.test(R[prevDay.r].r) && !(slot.sobras && slot.r===prevDay.r);
+  const cur = slot.fuera ? `<div class="prow cur">${outPlate()}<span><b>Comes fuera</b><small>Ahora mismo en el menú</small></span></div>`
+    : `<button class="prow cur" data-open-p="${slot.r}">${plate(slot.r)}<span><b>${esc(R[slot.r].n)}${slot.sobras?" (sobras)":""}</b><small>Ahora en el menú · toca para ver la receta</small></span></button>`;
+  $("panel").innerHTML = `<button class="close" id="rClose" aria-label="Cerrar">✕</button>
+    <div class="ptop"><div class="eyebrow">Cambiar el menú</div><h2 id="rTitle">${DAYS[i]} · ${MEALS[m]}</h2>
+    ${cur}
+    <div class="quick">${m!=="d"&&!slot.fuera?`<button class="btn" id="pFuera">Como fuera</button>`:""}${canSobras?`<button class="btn" id="pSobras">Sobras de ${esc(lower(R[prevDay.r].n))}</button>`:""}<button class="btn" id="pBase">Lo del menú original</button></div>
+    <input class="search" id="pSearch" type="search" placeholder="Buscar plato o ingrediente…" autocomplete="off" value="${esc(pickQ)}">
+    <div class="fchips" id="pCats">${CATS[pool].map(([k,l])=>`<button data-cat="${k}" aria-pressed="${pickCat===k}">${l}</button>`).join("")}</div>
+    <div class="count" id="pCount"></div>
+    <div class="plist" id="plist"></div></div>`;
+  renderPickList();
+}
+function renderPickList(){
+  const {i, m} = pick; const pool = m==="d" ? "d" : "m"; const slot = menu[i][m];
+  const q = pickQ.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+  const norm = (s) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+  let list = Object.keys(R).filter(k=>R[k].pool===pool).map(k=>({k, miss:missingRecipe(k)}));
+  if (pickCat==="ok") list = list.filter(a=>!a.miss.length);
+  else if (pickCat!=="all") list = list.filter(a=>R[a.k].cat===pickCat);
+  if (q) list = list.filter(a => norm(R[a.k].n).includes(q) || R[a.k].ing.some(([id])=>norm(ING[id].n).includes(q)));
+  list.sort((a,b)=>a.miss.length-b.miss.length || R[a.k].n.localeCompare(R[b.k].n,"es"));
+  $("pCount").textContent = `${list.length} ${list.length===1?"plato":"platos"}`;
+  $("plist").innerHTML = list.length ? list.map(a=>{
+    const r = R[a.k];
+    const st = a.miss.length ? `<small class="no">Falta: ${esc(a.miss.map(x=>ING[x].n.toLowerCase()).join(", "))}</small>` : `<small>✓ Lo tienes todo</small>`;
+    return `<button class="prow${!slot.fuera&&slot.r===a.k&&!slot.sobras?" cur":""}" data-open-p="${a.k}">${plate(a.k)}<span><b>${esc(r.n)}</b><small>⏱ ${r.t} · ${esc(r.r)}</small><br>${st}</span></button>`;
+  }).join("") : `<p class="legend">No hay platos con ese filtro.</p>`;
+}
+function setSlot(val){
+  const {i, m} = pick;
+  menu[i][m] = val;
+  saveMenu();
+  $("sheet").hidden = true; mode = null; pick = null; backToPick = false; document.body.style.overflow="";
+  renderAll();
+}
+
+/* ---------- Guardado ---------- */
+let dbDespensa = null, dbMenu = null, writing = Promise.resolve(), tHave = null, tMenu = null;
+const okMsg = "Guardado. Lo verás igual en el móvil y en el ordenador.", localMsg = "Guardado en este móvil.";
+function queueWrite(ref, body){
+  writing = writing.then(()=>ref.set(body)).then(()=>{ $("sync").textContent = okMsg; }).catch(()=>{ $("sync").textContent = localMsg; });
+}
+function persist(){
+  try { localStorage.setItem(LS, JSON.stringify([...have])); } catch(e) {}
+  if (!dbDespensa) return;
+  clearTimeout(tHave);
+  tHave = setTimeout(()=>queueWrite(dbDespensa, {tengo:[...have], actualizado:new Date().toISOString()}), 700);
+}
+function saveMenu(){
+  try { localStorage.setItem(LSM, JSON.stringify(menu)); } catch(e) {}
+  if (!dbMenu) return;
+  clearTimeout(tMenu);
+  tMenu = setTimeout(()=>queueWrite(dbMenu, {dias:clone(menu), actualizado:new Date().toISOString()}), 400);
+}
+function toggle(id){
+  if (have.has(id)) have.delete(id); else have.add(id);
+  persist(); renderNow(); renderShop();
+  if (mode==="recipe") renderRecipe(); else if (mode==="pick") renderPickList();
+}
+
+(async () => {
+  try {
+    const db = window.claude?.use ? await window.claude.use("db") : null;
+    if (!db) { $("sync").textContent = localMsg; return; }
+    dbDespensa = db.doc("casa/despensa");
+    dbMenu = db.doc("casa/menu");
+    dbDespensa.onSnapshot(snap => {
+      if (snap.metadata.hasPendingWrites) return;
+      if (snap.exists){ const t = snap.data().tengo; if (Array.isArray(t)) { have = new Set(t.filter(k=>ING[k])); try{localStorage.setItem(LS, JSON.stringify([...have]));}catch(e){} renderNow(); renderShop(); if (mode==="recipe") renderRecipe(); } }
+      $("sync").textContent = okMsg;
+    }, () => { $("sync").textContent = localMsg; });
+    dbMenu.onSnapshot(snap => {
+      if (snap.metadata.hasPendingWrites) return;
+      if (snap.exists){ const m = cleanMenu(snap.data().dias); if (m) { menu = m; try{localStorage.setItem(LSM, JSON.stringify(menu));}catch(e){} renderAll(); } }
+    }, () => {});
+  } catch(e) { $("sync").textContent = localMsg; }
+})();
+
+/* ---------- Eventos ---------- */
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("button");
+  if (!t) { if (e.target.id==="sheet") closeSheet(); return; }
+  if (t.dataset.v) return show(t.dataset.v);
+  if (t.dataset.open) return openRecipe(t.dataset.open, false);
+  if (t.dataset.openP) return openRecipe(t.dataset.openP, true);
+  if (t.dataset.pick) return setSlot({r:t.dataset.pick});
+  if (t.dataset.slot) { const [i,m] = t.dataset.slot.split("-"); return openPicker(i, m); }
+  if (t.dataset.toggle) return toggle(t.dataset.toggle);
+  if (t.dataset.cat) { pickCat = t.dataset.cat; document.querySelectorAll("#pCats button").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.cat===pickCat))); return renderPickList(); }
+  if (t.dataset.f) { filter = t.dataset.f; return renderShop(); }
+  if (t.dataset.m) { const ni = nowInfo(); override = {dayIdx: (override||ni).dayIdx, m: t.dataset.m}; return renderNow(); }
+  switch (t.id){
+    case "dayPrev": case "dayNext": { const ni = nowInfo(); const o = override || {dayIdx:ni.dayIdx,m:ni.m}; override = {m:o.m, dayIdx:(o.dayIdx+(t.id==="dayNext"?1:6))%7}; return renderNow(); }
+    case "backNow": override = null; return renderNow();
+    case "ideasMore": ideasAll = !ideasAll; return renderNow();
+    case "rClose": return closeSheet();
+    case "stPrev": stepI = Math.max(0, stepI-1); return renderRecipe();
+    case "stNext": stepI = Math.min(R[cur].steps.length-1, stepI+1); return renderRecipe();
+    case "stDone": return closeSheet();
+    case "stAll": showAll = !showAll; return renderRecipe();
+    case "pFuera": return setSlot({fuera:true});
+    case "pSobras": { const prev = menu[(pick.i+6)%7][pick.m]; return setSlot({r:prev.r, sobras:true}); }
+    case "pBase": return setSlot(clone(MENU_BASE[pick.i][pick.m]));
+    case "menuAsk": confirmMenu = true; return renderWeek();
+    case "menuNo": confirmMenu = false; return renderWeek();
+    case "menuYes": confirmMenu = false; menu = clone(MENU_BASE); saveMenu(); return renderAll();
+    case "resetAsk": confirmReset = true; return renderShop();
+    case "resetNo": confirmReset = false; return renderShop();
+    case "resetYes": confirmReset = false; have = new Set(); persist(); return renderAll();
+    case "allHave": menuIngs().forEach(i=>have.add(i)); persist(); return renderAll();
+  }
+});
+document.addEventListener("input", (e) => { if (e.target.id==="pSearch") { pickQ = e.target.value; renderPickList(); } });
+document.addEventListener("keydown", e => { if (e.key==="Escape" && mode) closeSheet(); });
+
+show("ahora");
+renderAll();
+setInterval(()=>{ renderAll(); }, 60000);
+</script>
+
+<script>if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}</script>
+</body></html>
