@@ -19,7 +19,7 @@ Pensada para bajar el colesterol y con poco presupuesto. Todo en español de Esp
 - `R` = recetas: `{n, pool:"d"|"m" (desayuno | comida/cena), cat, t ("20 min"), r ("1 ración"|"2 raciones"), base (color del plato o null), em (1–3 emojis), ing:[[id, cantidad]], basic (lo que siempre hay en casa), steps:[...], tip?}`.
   `cat` de desayuno: `dulce`|`salado`. De comida/cena: `leg`|`pes`|`car`|`hue`|`ver`|`pas`.
 - `col:false` en una receta o un alimento = no recomendado con el colesterol alto: el menú «Bajo en colesterol» no lo usa y la receta muestra un aviso. Los alimentos de la lista `SALTY` (latas, aceitunas, embutido, quesos…) sacan la receta del menú «Bajo en sal»; añade ahí los alimentos salados nuevos.
-- El menú automático tiene tres secciones de opciones que se combinan (`OPTS` y `GROUPS`): Salud (bajo en colesterol, bajo en sal, equilibrado), Tipo de alimentación (rico en proteína, equilibrado, vegetariano) y Tiempo y bolsillo (rápido, cocinar poco, económico).
+- El menú automático tiene tres secciones de opciones que se combinan (`OPTS` y `GROUPS`): Salud (bajo en colesterol, bajo en sal, equilibrado), Tipo de alimentación (rico en proteína, completo, vegetariano) y Tiempo y bolsillo (rápido, cocinar poco, económico).
 - Siempre en casa (no van en `ing`): aceite de oliva (de la cooperativa familiar), sal, ajo, pimentón, comino, laurel, orégano, perejil, canela, vinagre.
 
 ## Reglas para recetas nuevas

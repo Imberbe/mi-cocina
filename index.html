@@ -1000,6 +1000,8 @@ const MEAT = ["pollo","pavo","lomo","corzo","jabali"], FISH = ["merluza","salmon
 const PROT_M = [...MEAT, ...FISH, "huevos","tofu","soja","lentejas","garbanzos","alubias","quesoBurgos"];
 const PROT_D = ["huevos","quesoBatido","quesoBurgos","atun","pavo"];
 const has = (rid, list) => R[rid].ing.some(([id])=>list.includes(id));
+const VEG_ING = ["tomate","cebolla","zanahoria","pimiento","calabacin","espinacas","lechuga","brocoli","champis","berenjena","calabaza","judias","pepino","puerro","tomateTri","aguacate"];
+const STARCH = ["arroz","pasta","patata","pan","cuscus","quinoa","fideos","tortillas","tortitasMaiz"];
 /* Aptos para el colesterol y bajos en sal */
 const SALTY = ["atun","caballa","sardinas","mejillones","maiz","aceitunas","hummus","tortillas","jamonYork","parmesano","quesoTierno"];
 const colOk = (k) => R[k].col !== false && !R[k].ing.some(([id])=>ING[id] && ING[id].col===false);
@@ -1017,6 +1019,9 @@ const OPTS = {
   proteina:{n:"Rico en proteína",e:"💪",d:"Carne magra, pescado, huevos o legumbre en cada plato; desayunos con huevo o queso batido.",
     w:{leg:3,pes:4,car:5,hue:2,ver:0,pas:0},
     okM:(k)=>has(k,PROT_M), okD:(k)=>has(k,PROT_D)},
+  completo:{n:"Completo",e:"🍽️",d:"Platos completos: proteína, verdura y cereal o patata en el mismo plato, sin necesitar segundo. Desayunos con fruta, cereal y lácteo o proteína.",
+    w:{leg:3,pes:3,car:3,hue:2,ver:1,pas:2},
+    okM:(k)=>has(k,PROT_M) && has(k,VEG_ING) && has(k,STARCH), okD:(k)=>has(k,["fruta","platano","kiwi","frutos","tomate","aguacate"]) && has(k,["avena","pan","tortitasMaiz"]) && has(k,["huevos","yogur","quesoBatido","quesoBurgos","quesoTierno","leche","atun","pavo","hummus","nueces","jamonYork"])},
   vegetariano:{n:"Vegetariano",e:"🥕",d:"Sin carne ni pescado. Proteína de legumbres, tofu, soja, huevos y lácteos.",
     w:{leg:6,pes:0,car:0,hue:3,ver:3,pas:2}, veg:true,
     okM:(k)=>!has(k,[...MEAT,...FISH,"jamonYork"]), okD:(k)=>!has(k,[...MEAT,...FISH,"jamonYork"])},
@@ -1030,7 +1035,7 @@ const OPTS = {
 };
 const GROUPS = [
   {n:"Salud", d:"Qué tiene que cuidar el menú.", o:["colesterol","sal","equilibrado"]},
-  {n:"Tipo de alimentación", d:"De dónde sale la proteína.", o:["proteina","equilibrado","vegetariano"]},
+  {n:"Tipo de alimentación", d:"Qué lleva cada plato.", o:["proteina","completo","vegetariano"]},
   {n:"Tiempo y bolsillo", d:"Cuánto quieres cocinar y gastar.", o:["rapido","pocococina","economico"]},
 ];
 const W_BASE = {leg:4,pes:3,car:2,hue:2,ver:2,pas:1};
