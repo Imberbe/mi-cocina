@@ -1080,6 +1080,172 @@ function quotas(w, total){
   return q;
 }
 
+
+/* ---------- Ampliación del 24/11: alimentos nuevos y más platos en todas las categorías ---------- */
+Object.assign(ING, {
+  coliflor:{n:"Coliflor",svg:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 30c-4-10 10-16 14-12 4-6 18-2 14 12z" fill="#6E8F2C"/><g fill="#F6F2E2" stroke="#DCD5BC" stroke-width="1"><circle cx="17" cy="24" r="6"/><circle cx="24" cy="20" r="7"/><circle cx="31" cy="24" r="6"/><circle cx="20" cy="29" r="6"/><circle cx="28" cy="29" r="6"/></g><path d="M22 35h4v8h-4z" fill="#CFE0A6"/></svg>`,q:"1 unidad",p:1.6,s:"fruta"},
+  boniato:{n:"Boniatos",e:"🍠",q:"1 kg",p:1.8,s:"fruta"},
+  repollo:{n:"Repollo",svg:`<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="25" r="17" fill="#9CC46A"/><path d="M24 9c-6 8-6 24 0 33M24 9c6 8 6 24 0 33M9 22c8 3 22 3 30 0" stroke="#6E9A3C" stroke-width="1.8" fill="none"/></svg>`,q:"1 unidad",p:1.2,s:"fruta"},
+  esparragos:{n:"Espárragos verdes",svg:`<svg viewBox="0 0 48 48" aria-hidden="true"><g stroke-linecap="round" stroke-width="4"><path d="M14 44L20 8" stroke="#5F8A2C"/><path d="M22 44L25 6" stroke="#6E9A3C"/><path d="M30 44L30 8" stroke="#5F8A2C"/><path d="M37 44L35 10" stroke="#6E9A3C"/></g><rect x="12" y="30" width="27" height="5" rx="2" fill="#D9573C"/></svg>`,q:"manojo 250 g",p:2.0,s:"fruta"},
+  lentejasRojas:{n:"Lentejas rojas (coral)",svg:jar("#E07A3F"),q:"500 g",p:2.1,s:"despensa"},
+  arrozIntegral:{n:"Arroz integral",e:"🍚",q:"1 kg",p:1.6,s:"despensa"},
+  bacalao:{n:"Bacalao desalado congelado",e:"🐟",q:"400 g",p:5.5,s:"fresco"},
+  sardinasFrescas:{n:"Sardinas frescas",svg:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M6 24c8-8 24-9 32 0-8 9-24 8-32 0z" fill="#8FA3B3"/><path d="M38 24l6-5v10z" fill="#8FA3B3"/><path d="M10 24c8-3 18-3 26 0" stroke="#C9D6DF" stroke-width="2" fill="none"/><circle cx="12" cy="22" r="1.5" fill="#2E3A44"/></svg>`,q:"500 g",p:3.0,s:"fresco"},
+  gambas:{n:"Gambas peladas congeladas",e:"🦐",q:"300 g",p:3.5,s:"fresco"},
+  claras:{n:"Claras de huevo pasteurizadas",svg:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 10h20l4 6v26H10V16z" fill="#F7F7F2" stroke="#C7CDBD" stroke-width="1.5"/><path d="M10 16h28" stroke="#C7CDBD" stroke-width="1.5"/><ellipse cx="24" cy="30" rx="8" ry="6" fill="#fff" stroke="#E3E1D3"/></svg>`,q:"brik 500 g",p:1.6,s:"fresco"},
+  almendras:{n:"Almendras naturales",svg:`<svg viewBox="0 0 48 48" aria-hidden="true"><g fill="#C9905A" stroke="#9E6A3A" stroke-width="1.2"><path d="M14 30c-2-8 4-16 8-16 2 6 0 14-8 16z"/><path d="M26 34c0-8 6-14 10-13 0 6-3 13-10 13z"/><path d="M20 40c2-7 9-10 12-8-2 5-7 9-12 8z"/></g></svg>`,q:"200 g",p:2.4,s:"despensa"},
+});
+Object.assign(PACK, {
+  coliflor:{n:1}, boniato:{n:5}, repollo:{n:1}, esparragos:{g:250}, lentejasRojas:{g:500}, arrozIntegral:{g:1000},
+  bacalao:{g:400}, sardinasFrescas:{g:500}, gambas:{g:300}, claras:{g:500,f:.3}, almendras:{n:160},
+});
+FISH.push("bacalao","sardinasFrescas","gambas");
+AZUL.push("sardinasFrescas");
+PROT_M.push("bacalao","sardinasFrescas","gambas","claras","lentejasRojas");
+PROT_D.push("claras");
+VEG_ING.push("coliflor","repollo","esparragos","boniato");
+STARCH.push("boniato","arrozIntegral");
+
+Object.assign(R, {
+  /* Desayunos dulces */
+  tostadaAlmendras:{n:"Tostada con queso batido, manzana y almendras",pool:"d",cat:"dulce",t:"4 min",r:"1 ración",base:null,em:["🍞","🍎","🌰"],
+    ing:[["pan","2 rebanadas"],["quesoBatido","2 cucharadas"],["fruta","½ manzana"],["almendras","8"]],basic:"Canela",
+    steps:["Tuesta el pan y úntalo con el queso batido.","Pon la manzana en láminas finas encima.","Termina con las almendras picadas y canela."]},
+  avenaAlmendras:{n:"Avena cocida con almendras y fruta",pool:"d",cat:"dulce",t:"6 min",r:"1 ración",base:"#E9D6AE",em:["🌾","🌰","🍎"],
+    ing:[["avena","40 g"],["leche","200 ml"],["almendras","8"],["fruta","1 pieza"]],basic:"Canela",
+    steps:["Cuece la avena con la leche 4 minutos, removiendo.","Sírvela con la fruta troceada.","Pon por encima las almendras picadas y canela."],
+    tip:"Las almendras, como las nueces, aportan grasa buena que ayuda con el colesterol."},
+  tortitasClaras:{n:"Tortitas de claras, avena y plátano",pool:"d",cat:"dulce",t:"12 min",r:"1 ración (4 tortitas)",base:null,em:["🥞","🍌"],
+    ing:[["claras","100 g"],["avena","40 g"],["platano","1"]],basic:"Canela y unas gotas de aceite",
+    steps:["Aplasta el plátano y mézclalo con las claras, la avena y canela.","Calienta una sartén antiadherente con unas gotas de aceite a fuego medio.","Haz 4 tortitas, 2 minutos por cada lado."],
+    tip:"Con claras en lugar de huevo entero: mucha proteína y nada de colesterol."},
+
+  /* Desayunos salados */
+  tortillaClarasEspinacas:{n:"Tortilla de claras con espinacas y tostada",pool:"d",cat:"salado",t:"8 min",r:"1 ración",base:"#F0EBC8",em:["🥚","🥬","🍞"],
+    ing:[["claras","150 g"],["espinacas","50 g"],["pan","1 rebanada"]],basic:"Unas gotas de aceite y sal",
+    steps:["Saltea las espinacas 1 minuto en una sartén con unas gotas de aceite.","Echa las claras con una pizca de sal y cuaja a fuego medio-bajo 2 minutos por lado.","Sírvela con el pan tostado."]},
+  revueltoClaras:{n:"Revuelto de claras con tomate y tostada",pool:"d",cat:"salado",t:"6 min",r:"1 ración",base:null,em:["🍳","🍅","🍞"],
+    ing:[["claras","150 g"],["tomate","1"],["pan","1 rebanada"]],basic:"Orégano, unas gotas de aceite y sal",
+    steps:["Saltea el tomate en dados 2 minutos.","Añade las claras y remueve a fuego bajo hasta que cuajen jugosas.","Sírvelo con orégano y el pan tostado."]},
+  tortitasAguacate:{n:"Tortitas de maíz con aguacate y tomate",pool:"d",cat:"salado",t:"3 min",r:"1 ración",base:null,em:["🥑","🍅"],
+    ing:[["tortitasMaiz","3"],["aguacate","½"],["tomate","½"]],basic:"Sal y unas gotas de limón",
+    steps:["Aplasta el aguacate con un tenedor, sal y unas gotas de limón.","Úntalo en las tortitas.","Pon el tomate en rodajas finas encima."]},
+
+  /* Legumbres */
+  dalLentejas:{n:"Dal de lentejas rojas con arroz",pool:"m",cat:"leg",t:"30 min",r:"2 raciones",base:"#E39A3C",em:["🍚","🥬"],
+    ing:[["lentejasRojas","150 g"],["tomateTri","200 g"],["cebolla","1"],["espinacas","100 g"],["arroz","120 g"]],basic:"Ajo, curry o comino, 1 cucharada de aceite y sal",
+    steps:["Sofríe la cebolla y el ajo picados 5 minutos con el curry.","Añade las lentejas lavadas, el tomate y 600 ml de agua. Cuece 20 minutos: las rojas se deshacen solas y espesan.","Mientras, cuece el arroz 18 minutos.","Añade las espinacas al dal los últimos 2 minutos y sírvelo con el arroz."],
+    tip:"Las lentejas rojas no necesitan remojo y se hacen en la mitad de tiempo."},
+  cremaLentejasRojas:{n:"Crema de lentejas rojas y zanahoria",pool:"m",cat:"leg",t:"25 min",r:"2 raciones",base:"#E8873A",em:["🥕"],
+    ing:[["lentejasRojas","120 g"],["zanahoria","3"],["cebolla","1"]],basic:"Comino, 1 cucharada de aceite y sal",
+    steps:["Pocha la cebolla picada 5 minutos con el aceite.","Añade la zanahoria en rodajas, las lentejas lavadas, el comino y 800 ml de agua.","Cuece 18 minutos y tritura. Sala al final."]},
+  garbanzosBacalao:{n:"Potaje de garbanzos con bacalao y espinacas",pool:"m",cat:"leg",t:"30 min",r:"2 raciones",base:"#CDA764",em:["🐟","🥬"],
+    ing:[["garbanzos","2 botes"],["bacalao","200 g"],["espinacas","200 g"],["cebolla","1"]],basic:"Ajo, pimentón, laurel y 2 cucharadas de aceite",
+    steps:["Sofríe la cebolla y el ajo picados 5 minutos. Aparta del fuego y añade el pimentón.","Añade 500 ml de agua, el laurel y los garbanzos enjuagados. Cuece 10 minutos.","Añade las espinacas y el bacalao en trozos y cuece 6 minutos más, sin remover mucho para que no se deshaga.","Prueba antes de salar: el bacalao ya lleva algo de sal."]},
+  alubiasRepollo:{n:"Alubias con repollo y patata",pool:"m",cat:"leg",t:"30 min",r:"2 raciones",base:"#B5753F",em:["🥬","🥔"],
+    ing:[["alubias","1 bote"],["repollo","¼"],["patata","1"],["zanahoria","1"]],basic:"Ajo, pimentón, laurel, 2 cucharadas de aceite y sal",
+    steps:["Corta el repollo en tiras y la patata y la zanahoria en trozos.","Cuécelos en 700 ml de agua con laurel y sal 15 minutos.","Añade las alubias enjuagadas y cuece 5 minutos más.","Sofríe el ajo laminado, aparta, añade el pimentón y échalo al guiso."],
+    tip:"El sabor de un cocido gallego, sin tocino ni chorizo."},
+  lentejasIntegral:{n:"Lentejas con arroz integral y verduras",pool:"m",cat:"leg",t:"45 min",r:"2 raciones",base:"#7E5637",em:["🍚","🫑","🥕"],
+    ing:[["lentejas","150 g"],["arrozIntegral","60 g"],["pimiento","½"],["zanahoria","1"],["cebolla","1"]],basic:"Ajo, pimentón, laurel, 2 cucharadas de aceite y sal",
+    steps:["Sofríe la cebolla, el ajo, el pimiento y la zanahoria picados 8 minutos.","Añade el pimentón, las lentejas lavadas, el arroz integral, el laurel y 1 litro de agua.","Cuece 35 minutos a fuego suave, añadiendo agua si hace falta. Sala al final."]},
+
+  /* Pescado */
+  sardinasHorno:{n:"Sardinas al horno con patatas",pool:"m",cat:"pes",t:"40 min",r:"1 ración",base:null,em:["🐟","🥔","🍋"],
+    ing:[["sardinasFrescas","250 g"],["patata","1"],["cebolla","½"],["limon","½"]],basic:"Ajo, perejil, 1 cucharada de aceite y sal",
+    steps:["Precalienta el horno a 200 °C. Pide en la pescadería las sardinas limpias.","Hornea la patata en rodajas finas y la cebolla con aceite y sal 25 minutos.","Pon las sardinas encima con ajo y perejil picados.","Hornea 8–10 minutos más y sirve con limón."],
+    tip:"La sardina fresca es de los pescados azules más baratos y con más omega-3."},
+  bacalaoTomate:{n:"Bacalao con tomate y pimiento",pool:"m",cat:"pes",t:"30 min",r:"1 ración",base:"#C9503A",em:["🐟","🍅","🫑"],
+    ing:[["bacalao","200 g"],["tomateTri","200 g"],["cebolla","½"],["pimiento","½"]],basic:"Ajo y 1 cucharada de aceite",
+    steps:["Sofríe la cebolla, el ajo y el pimiento en tiras 8 minutos.","Añade el tomate y cocina 8 minutos.","Pon el bacalao en la salsa, tapa y cuece 8 minutos a fuego suave.","Prueba antes de salar."]},
+  bacalaoBoniato:{n:"Bacalao al horno con boniato",pool:"m",cat:"pes",t:"40 min",r:"1 ración",base:null,em:["🐟","🍠"],
+    ing:[["bacalao","200 g"],["boniato","1"],["cebolla","½"]],basic:"Ajo, pimentón, 1 cucharada de aceite",
+    steps:["Precalienta el horno a 200 °C.","Hornea el boniato en rodajas y la cebolla con la mitad del aceite 25 minutos.","Pon el bacalao encima con ajo laminado, pimentón y el resto del aceite.","Hornea 12 minutos más."]},
+  gambasAjillo:{n:"Gambas al ajillo con arroz integral",pool:"m",cat:"pes",t:"35 min",r:"1 ración",base:"#EDD9A0",em:["🦐","🍚"],
+    ing:[["gambas","120 g"],["arrozIntegral","70 g"],["lechuga","unas hojas"]],basic:"3 dientes de ajo, guindilla si te gusta, perejil, 1 cucharada de aceite y sal",
+    steps:["Cuece el arroz integral 30 minutos en agua con sal y escúrrelo.","Dora el ajo laminado y la guindilla en el aceite a fuego bajo.","Sube el fuego, añade las gambas descongeladas y saltéalas 2 minutos.","Sirve con perejil, el arroz y la lechuga."]},
+  gambasEsparragos:{n:"Salteado de gambas con espárragos",pool:"m",cat:"pes",t:"15 min",r:"1 ración",base:null,em:["🦐","🌱"],
+    ing:[["gambas","120 g"],["esparragos","125 g"],["champis","100 g"]],basic:"Ajo, 1 cucharada de aceite y sal",
+    steps:["Corta los espárragos en trozos (quita la parte dura) y lamina los champiñones.","Saltéalos con el ajo y el aceite a fuego fuerte 5 minutos.","Añade las gambas y saltea 2 minutos más. Sala al final."]},
+  arrozMarinero:{n:"Arroz caldoso de merluza y gambas",pool:"m",cat:"pes",t:"35 min",r:"2 raciones",base:"#D98E44",em:["🍚","🦐","🐟"],
+    ing:[["arroz","160 g"],["gambas","100 g"],["merluza","200 g"],["tomateTri","150 g"],["pimiento","½"]],basic:"Ajo, pimentón, 2 cucharadas de aceite y sal",
+    steps:["Sofríe el pimiento y el ajo picados 5 minutos. Añade el pimentón y el tomate y cocina 3 minutos.","Echa el arroz y 1 litro de agua caliente con sal. Cuece 15 minutos.","Añade la merluza en trozos y las gambas y cuece 4 minutos más. Debe quedar caldoso."]},
+
+  /* Carne magra */
+  polloBoniato:{n:"Pollo al horno con boniato",pool:"m",cat:"car",t:"45 min",r:"1 ración",base:"#EFE6D2",em:["🍗","🍠"],
+    ing:[["pollo","150 g"],["boniato","1"],["cebolla","½"]],basic:"Pimentón, comino, 1 cucharada de aceite y sal",
+    steps:["Precalienta el horno a 200 °C.","Corta el boniato en gajos y la cebolla en tiras; ponlos en una bandeja con aceite, especias y sal. Hornea 20 minutos.","Añade el pollo en trozos con sal y pimentón y hornea 20 minutos más."]},
+  pavoAlmendras:{n:"Pavo en salsa de almendras con arroz",pool:"m",cat:"car",t:"30 min",r:"1 ración",base:"#E3C990",em:["🌰","🍚"],
+    ing:[["pavo","150 g"],["almendras","15"],["cebolla","½"],["arroz","70 g"],["pan","1 rebanada"]],basic:"Ajo, laurel, 1 cucharada de aceite y sal",
+    steps:["Cuece el arroz 18 minutos.","Dora el pavo en dados con el aceite y sácalo. En el mismo aceite, dora el pan, el ajo y las almendras y májalos con un poco de agua.","Sofríe la cebolla picada 5 minutos, vuelve a poner el pavo, añade la pasta de almendras, el laurel y un vaso de agua.","Cuece 10 minutos hasta que espese. Sirve con el arroz."],
+    tip:"Como un pollo en pepitoria, sin yema de huevo y con pavo."},
+  polloEsparragos:{n:"Pollo salteado con espárragos y champiñones",pool:"m",cat:"car",t:"35 min",r:"1 ración",base:null,em:["🍗","🌱","🍄"],
+    ing:[["pollo","150 g"],["esparragos","125 g"],["champis","100 g"],["arrozIntegral","60 g"]],basic:"Ajo, 1 cucharada de aceite y sal",
+    steps:["Cuece el arroz integral 30 minutos.","Saltea el pollo en tiras 5 minutos y sácalo.","Saltea los espárragos en trozos y los champiñones con ajo 5 minutos.","Vuelve a poner el pollo, mezcla y sirve con el arroz."]},
+  lomoRepollo:{n:"Lomo con repollo salteado",pool:"m",cat:"car",t:"20 min",r:"1 ración",base:null,em:["🥩","🥬"],
+    ing:[["lomo","150 g"],["repollo","¼"],["zanahoria","1"]],basic:"Ajo, pimentón, 1 cucharada de aceite y sal",
+    steps:["Corta el repollo en tiras finas y la zanahoria en bastones.","Saltéalos con el ajo y la mitad del aceite 8 minutos, tapando a ratos. Añade el pimentón.","Haz el lomo a la plancha 2 minutos por lado y sírvelo encima."]},
+  polloColiflor:{n:"Pollo con coliflor al curry",pool:"m",cat:"car",t:"30 min",r:"1 ración",base:"#E3B25A",em:["🍗","🥦","🍚"],
+    ing:[["pollo","150 g"],["coliflor","¼"],["cebolla","½"],["yogur","1"],["arroz","70 g"]],basic:"1 cucharadita de curry, 1 cucharada de aceite y sal",
+    steps:["Cuece el arroz 18 minutos.","Dora el pollo en dados 5 minutos. Añade la cebolla picada y la coliflor en ramitos pequeños con el curry.","Añade medio vaso de agua, tapa y cuece 10 minutos.","Apaga el fuego, mezcla con el yogur y sirve con el arroz."]},
+
+  /* Huevos y claras */
+  tortillaClarasChamp:{n:"Tortilla de claras con champiñones",pool:"m",cat:"hue",t:"12 min",r:"1 ración",base:"#F0EBC8",em:["🥚","🍄"],
+    ing:[["claras","200 g"],["champis","125 g"],["cebolla","¼"],["pan","1 rebanada"]],basic:"Ajo, perejil, unas gotas de aceite y sal",
+    steps:["Saltea la cebolla, el ajo y los champiñones laminados 6 minutos.","Echa las claras con sal y perejil y cuaja 2–3 minutos por lado.","Acompaña con el pan tostado."],
+    tip:"Las claras no tienen colesterol: esta tortilla sí entra en el menú bajo en colesterol."},
+  revueltoEsparragos:{n:"Revuelto de espárragos y gambas",pool:"m",cat:"hue",t:"15 min",r:"1 ración",base:"#EBD27A",em:["🌱","🦐","🥚"],
+    ing:[["huevos","2"],["esparragos","125 g"],["gambas","60 g"],["pan","1 rebanada"]],basic:"Ajo, 1 cucharada de aceite y sal",
+    steps:["Saltea los espárragos en trozos con el ajo 5 minutos.","Añade las gambas y saltea 1 minuto.","Echa los huevos batidos con sal y remueve a fuego bajo hasta que cuajen jugosos. Sirve con el pan."]},
+  huevosBoniato:{n:"Huevos al horno con boniato y pimiento",pool:"m",cat:"hue",t:"40 min",r:"1 ración",base:null,em:["🍳","🍠","🫑"],
+    ing:[["huevos","2"],["boniato","1"],["pimiento","½"],["cebolla","¼"]],basic:"Pimentón, 1 cucharada de aceite y sal",
+    steps:["Precalienta el horno a 200 °C.","Hornea el boniato en dados pequeños, el pimiento y la cebolla con el aceite, pimentón y sal 25 minutos.","Haz dos huecos, casca los huevos y hornea 6–8 minutos más, hasta que cuaje la clara."],
+    tip:"Como unos huevos rotos, sin freír nada."},
+  frittataClaras:{n:"Frittata de claras y verduras",pool:"m",cat:"hue",t:"30 min",r:"2 raciones",base:"#F0EBC8",em:["🥚","🥒","🫑"],
+    ing:[["claras","400 g"],["calabacin","1"],["pimiento","½"],["cebolla","½"]],basic:"Orégano, 1 cucharada de aceite y sal",
+    steps:["Precalienta el horno a 190 °C.","Saltea las verduras en dados 8 minutos.","Ponlas en una fuente, cubre con las claras, sal y orégano.","Hornea 18 minutos, hasta que cuaje."]},
+
+  /* Verduras */
+  coliflorHorno:{n:"Coliflor asada con especias y yogur",pool:"m",cat:"ver",t:"35 min",r:"1 ración",base:null,em:["🥦","🍋"],
+    ing:[["coliflor","½"],["garbanzos","½ bote"],["yogur","1"],["limon","½"]],basic:"Comino, pimentón, ajo, 1 cucharada de aceite y sal",
+    steps:["Precalienta el horno a 210 °C.","Mezcla la coliflor en ramitos y los garbanzos escurridos con aceite, comino, pimentón y sal.","Hornea 25 minutos, hasta que se doren los bordes.","Sírvelo con el yogur mezclado con ajo y limón."]},
+  cremaColiflor:{n:"Crema de coliflor",pool:"m",cat:"ver",t:"25 min",r:"2 raciones",base:"#EFE9D3",em:["🥦"],
+    ing:[["coliflor","½"],["patata","1"],["cebolla","½"],["leche","200 ml"]],basic:"Nuez moscada si tienes, 1 cucharada de aceite y sal",
+    steps:["Pocha la cebolla 5 minutos.","Añade la coliflor y la patata en trozos y cubre justo con agua. Cuece 15 minutos.","Añade la leche y tritura. Una pizca de nuez moscada le va muy bien."]},
+  boniatoRelleno:{n:"Boniato asado relleno de garbanzos y espinacas",pool:"m",cat:"ver",t:"45 min",r:"1 ración",base:null,em:["🍠","🥬"],
+    ing:[["boniato","1 grande"],["garbanzos","½ bote"],["espinacas","100 g"],["yogur","1"]],basic:"Comino, ajo, 1 cucharada de aceite y sal",
+    steps:["Asa el boniato entero a 200 °C unos 40 minutos (o 8 minutos en el microondas, pinchado).","Saltea los garbanzos con las espinacas, ajo y comino 4 minutos.","Abre el boniato, rellénalo y pon el yogur por encima."]},
+  ensaladaCol:{n:"Ensalada de col, zanahoria y manzana",pool:"m",cat:"ver",t:"10 min",r:"1 ración",base:null,em:["🥬","🥕","🍎"],
+    ing:[["repollo","⅛"],["zanahoria","1"],["fruta","½ manzana"],["yogur","1"]],basic:"Vinagre o limón y sal",
+    steps:["Corta el repollo en tiras muy finas y ralla la zanahoria y la manzana.","Mezcla el yogur con un chorrito de vinagre y sal.","Aliña la ensalada y déjala reposar 5 minutos."],
+    tip:"Como la ensalada de col americana, con yogur en lugar de mayonesa."},
+  esparragosHuevo:{n:"Espárragos a la plancha con huevo poché",pool:"m",cat:"ver",t:"15 min",r:"1 ración",base:null,em:["🌱","🥚","🍞"],
+    ing:[["esparragos","250 g"],["huevos","1"],["pan","1 rebanada"]],basic:"1 cucharada de aceite y sal en escamas",
+    steps:["Haz los espárragos a la plancha con unas gotas de aceite 6–8 minutos.","Cuece el huevo en agua hirviendo, sin cáscara, 3 minutos (poché).","Sírvelo sobre los espárragos con sal y el pan."]},
+  cremaBoniato:{n:"Crema de boniato y zanahoria",pool:"m",cat:"ver",t:"25 min",r:"2 raciones",base:"#E98B3A",em:["🍠","🥕"],
+    ing:[["boniato","1"],["zanahoria","2"],["cebolla","½"]],basic:"Jengibre o comino, 1 cucharada de aceite y sal",
+    steps:["Pocha la cebolla 5 minutos.","Añade el boniato y las zanahorias en trozos y cubre justo con agua. Cuece 15 minutos.","Tritura con las especias y ajusta la sal."]},
+
+  /* Pasta, arroz y cereales */
+  pastaGambas:{n:"Pasta con gambas y calabacín",pool:"m",cat:"pas",t:"20 min",r:"1 ración",base:"#E9B9A0",em:["🍝","🦐","🥒"],
+    ing:[["pasta","80 g"],["gambas","100 g"],["calabacin","½"],["tomate","1"]],basic:"Ajo, guindilla si te gusta, perejil, 1 cucharada de aceite y sal",
+    steps:["Cuece la pasta el tiempo del paquete.","Saltea el ajo y el calabacín en dados 5 minutos. Añade el tomate en dados 2 minutos.","Añade las gambas, saltea 2 minutos y mezcla con la pasta y perejil."]},
+  arrozIntegralAlmendras:{n:"Arroz integral salteado con brócoli y almendras",pool:"m",cat:"pas",t:"35 min",r:"1 ración",base:"#D9C79A",em:["🍚","🥦","🌰"],
+    ing:[["arrozIntegral","75 g"],["brocoli","½"],["zanahoria","1"],["almendras","12"],["huevos","1"]],basic:"Ajo, 1 cucharada de aceite y sal",
+    steps:["Cuece el arroz integral 30 minutos y escúrrelo.","Saltea el brócoli en ramitos pequeños y la zanahoria con ajo 6 minutos.","Cuaja el huevo batido en un hueco de la sartén.","Mézclalo todo con el arroz y las almendras tostadas."]},
+  macarronesColiflor:{n:"Macarrones con coliflor, ajo y guindilla",pool:"m",cat:"pas",t:"20 min",r:"1 ración",base:"#E8DDB8",em:["🍝","🥦"],
+    ing:[["pasta","80 g"],["coliflor","¼"]],basic:"2 dientes de ajo, guindilla, perejil, 1 cucharada de aceite y sal",
+    steps:["Cuece la pasta y, a falta de 6 minutos, añade la coliflor en ramitos pequeños a la misma olla.","Dora el ajo y la guindilla en el aceite a fuego bajo.","Escurre y saltea todo junto 1 minuto con perejil."]},
+  arrozBacalao:{n:"Arroz con bacalao y verduras",pool:"m",cat:"pas",t:"35 min",r:"2 raciones",base:"#E6B84A",em:["🍚","🐟","🫑"],
+    ing:[["arroz","160 g"],["bacalao","200 g"],["pimiento","1"],["tomateTri","100 g"],["judias","100 g"]],basic:"Ajo, pimentón, 2 cucharadas de aceite",
+    steps:["Sofríe el pimiento en tiras y las judías con el ajo 6 minutos.","Añade el pimentón, el tomate y el arroz y remueve.","Echa 500 ml de agua caliente y cuece 15 minutos.","Pon el bacalao en trozos encima y cuece 4 minutos más. Prueba antes de salar."]},
+  cuscusBoniato:{n:"Cuscús con boniato asado y garbanzos",pool:"m",cat:"pas",t:"35 min",r:"1 ración",base:"#E8CF7A",em:["🍠","🥕"],
+    ing:[["cuscus","60 g"],["boniato","1"],["garbanzos","½ bote"],["cebolla","¼"]],basic:"Comino, canela, 1 cucharada de aceite y sal",
+    steps:["Asa el boniato en dados con la cebolla, aceite, comino y sal a 200 °C 25 minutos.","Prepara el cuscús con el mismo volumen de agua hirviendo y sal. Tapa 5 minutos.","Mézclalo con el boniato, los garbanzos y una pizca de canela."]},
+});
+OPTS.colesterol.okM = (k)=>colOk(k) && !has(k,["lomo"]) && !(R[k].cat==="hue" && has(k,["huevos"]));
+{ const eco = OPTS.economico.okM; OPTS.economico.okM = (k)=>eco(k) && !has(k,["gambas","bacalao","esparragos","almendras"]); }
+
 function rng(seed){ let a = seed>>>0; return ()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
 function shuffle(arr, rnd){ for (let i=arr.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
 
