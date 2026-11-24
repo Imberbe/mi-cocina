@@ -332,6 +332,14 @@ const ING = {
   quinoa:{n:"Quinoa",svg:jar("#ECE0BC"),q:"500 g",p:2.9,s:"despensa"},
   soja:{n:"Soja texturizada",svg:jar("#B07A45"),q:"200 g",p:1.9,s:"despensa"},
   mejillones:{n:"Mejillones al natural",svg:can("#2E2E3A",`<ellipse cx="24" cy="27" rx="8" ry="4.5" fill="#fff"/><path d="M16 27h16" stroke="#2E2E3A" stroke-width="1.5"/>`),q:"pack de 3 latas",p:3.0,s:"despensa"},
+  /* Añadidos por sugerencia (24/11/2026) */
+  corzo:{n:"Corzo (cabirol) en trozos",e:"🦌",q:"500 g",p:9.0,s:"fresco"},
+  jabali:{n:"Jabalí en trozos o picado",e:"🐗",q:"500 g",p:7.5,s:"fresco"},
+  aceitunas:{n:"Aceitunas",e:"🫒",q:"1 bote (150 g escurridas)",p:1.3,s:"despensa"},
+  hummus:{n:"Hummus",svg:cup("#D9B26E"),q:"tarrina 240 g",p:1.6,s:"fresco"},
+  tortitasMaiz:{n:"Tortitas de maíz",svg:`<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="25" r="15" fill="#F3DC8E" stroke="#D9B85A" stroke-width="1.5"/><circle cx="19" cy="21" r="1.6" fill="#E1C268"/><circle cx="28" cy="20" r="1.6" fill="#E1C268"/><circle cx="24" cy="28" r="1.6" fill="#E1C268"/><circle cx="17" cy="30" r="1.6" fill="#E1C268"/><circle cx="31" cy="29" r="1.6" fill="#E1C268"/></svg>`,q:"paquete de 20 (130 g)",p:1.0,s:"despensa"},
+  pepino:{n:"Pepinos",e:"🥒",q:"3 unidades",p:1.2,s:"fruta"},
+  puerro:{n:"Puerros",svg:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M21 44V22h6v22z" fill="#F4F1E1" stroke="#D8D2B5" stroke-width="1.2"/><path d="M21 24C18 14 12 8 8 5M24 23c0-8 0-14-1-19M27 24c3-10 9-16 13-19" stroke="#6E8F2C" stroke-width="5" stroke-linecap="round" fill="none"/><path d="M21 22h6v6h-6z" fill="#CFE0A6"/></svg>`,q:"manojo de 3",p:1.5,s:"fruta"},
 };
 const icon = (id) => ING[id].svg || ING[id].e;
 
@@ -767,6 +775,76 @@ const R = {
   quinoaVerduras:{n:"Quinoa salteada con verduras y huevo",pool:"m",cat:"pas",t:"25 min",r:"1 ración",base:"#E6D7A6",em:["🥒","🥕","🍳"],
     ing:[["quinoa","70 g"],["calabacin","½"],["zanahoria","1"],["huevos","1"]],basic:"Ajo, 1 cucharada de aceite y sal",
     steps:["Lava la quinoa y cuécela 12 minutos. Escúrrela.","Saltea las verduras en dados con el ajo 6 minutos.","Añade la quinoa y mezcla.","Sirve con un huevo a la plancha encima."]},
+
+  /* ===== Añadidas por sugerencia (24/11/2026) ===== */
+  /* Desayunos */
+  tostadaHummus:{n:"Tostada con hummus y tomate",pool:"d",cat:"salado",t:"4 min",r:"1 ración",base:null,em:["🍞","🍅"],
+    ing:[["pan","2 rebanadas"],["hummus","2 cucharadas"],["tomate","½"]],basic:"Pimentón o comino por encima",
+    steps:["Tuesta el pan.","Unta cada rebanada con una cucharada de hummus.","Pon encima el tomate en rodajas finas y una pizca de pimentón."],
+    tip:"Vale el de tarrina o el casero de la receta «Hummus con palitos de zanahoria». Es garbanzo y aceite de oliva: fibra y grasa buena para el colesterol."},
+  tostadaAceitunas:{n:"Tostada con queso fresco, tomate y aceitunas",pool:"d",cat:"salado",t:"4 min",r:"1 ración",base:null,em:["🍞","🧀","🫒"],
+    ing:[["pan","2 rebanadas"],["quesoBurgos","50 g"],["tomate","½"],["aceitunas","6 aceitunas"]],basic:"Orégano",
+    steps:["Tuesta el pan y frótalo con el tomate.","Pon el queso fresco en lonchas finas.","Añade las aceitunas en rodajas y una pizca de orégano."]},
+  tortitasMaizQueso:{n:"Tortitas de maíz con queso fresco y tomate",pool:"d",cat:"salado",t:"3 min",r:"1 ración",base:null,em:["🧀","🍅"],
+    ing:[["tortitasMaiz","3 tortitas"],["quesoBurgos","50 g"],["tomate","½"]],basic:"Orégano y unas gotas de aceite",
+    steps:["Corta el queso fresco en lonchas finas y el tomate en rodajas.","Repártelos sobre las tortitas.","Añade orégano y unas gotas de aceite justo antes de comer, para que no se ablanden."]},
+  tortitasMaizHummus:{n:"Tortitas de maíz con hummus y pepino",pool:"d",cat:"salado",t:"3 min",r:"1 ración",base:null,em:["🥒"],
+    ing:[["tortitasMaiz","3 tortitas"],["hummus","2 cucharadas"],["pepino","¼"]],basic:"Pimentón",
+    steps:["Corta el pepino en rodajas finas.","Unta las tortitas con el hummus.","Pon el pepino encima y una pizca de pimentón."]},
+
+  /* Carne magra (caza: carne roja muy magra, como mucho una vez por semana) */
+  corzoGuiso:{n:"Guiso de corzo con patatas",pool:"m",cat:"car",t:"90 min",r:"2 raciones",base:"#9B5B3A",em:["🦌","🥔","🥕"],
+    ing:[["corzo","300 g"],["patata","2"],["zanahoria","2"],["cebolla","1"],["tomateTri","100 g"]],basic:"2 dientes de ajo, 1 hoja de laurel, pimentón, 2 cucharadas de aceite y sal",
+    steps:["Quita a la carne la grasa y los tendones que se vean y córtala en dados. Sálala.","Dórala en una cazuela con el aceite a fuego fuerte 5 minutos y apártala.","En la misma cazuela, pocha la cebolla, el ajo y la zanahoria picados 8 minutos a fuego medio.","Añade el pimentón y el tomate, cocina 3 minutos y vuelve a poner la carne. Cubre con agua, añade el laurel, tapa y cuece 60 minutos a fuego suave.","Echa las patatas en trozos y cuece 20 minutos más, hasta que estén tiernas."],
+    tip:"El corzo tiene muy poca grasa. Al día siguiente el guiso está aún mejor."},
+  corzoPlancha:{n:"Filetes de corzo con pimientos y cebolla",pool:"m",cat:"car",t:"20 min",r:"1 ración",base:null,em:["🦌","🫑","🧅"],
+    ing:[["corzo","150 g en filetes finos"],["pimiento","1"],["cebolla","½"]],basic:"1 diente de ajo, orégano, 1 cucharada de aceite y sal",
+    steps:["Corta el pimiento y la cebolla en tiras y saltéalos con media cucharada de aceite y el ajo 10 minutos a fuego medio. Apártalos.","Sala los filetes y ponlos en la sartén bien caliente con el resto del aceite.","Hazlos solo 1–2 minutos por cada lado: si se pasan, se quedan secos.","Sírvelos con la verdura y una pizca de orégano."]},
+  jabaliGuiso:{n:"Jabalí guisado con champiñones",pool:"m",cat:"car",t:"100 min",r:"2 raciones",base:"#7A4A2E",em:["🐗","🍄","🥕"],
+    ing:[["jabali","300 g en dados"],["champis","250 g"],["cebolla","1"],["zanahoria","1"],["tomateTri","100 g"]],basic:"2 dientes de ajo, 1 hoja de laurel, 1 chorrito de vinagre, 2 cucharadas de aceite y sal",
+    steps:["Quita la grasa que se vea a la carne, sálala y dórala en la cazuela con el aceite 5 minutos. Apártala.","Pocha la cebolla, la zanahoria y el ajo picados 8 minutos.","Añade el tomate y el chorrito de vinagre y cocina 3 minutos.","Vuelve a poner la carne, cubre con agua, añade el laurel, tapa y cuece 70 minutos a fuego suave.","Añade los champiñones laminados y cuece 15 minutos más sin tapa para que espese la salsa."],
+    tip:"Acompáñalo con arroz o patata cocida. Es carne roja: mejor una vez a la semana como mucho."},
+
+  /* Pasta */
+  pastaJabali:{n:"Pasta con ragú de jabalí",pool:"m",cat:"pas",t:"60 min",r:"2 raciones",base:"#B4553A",em:["🍝","🐗","🍅"],
+    ing:[["pasta","160 g"],["jabali","200 g picado"],["tomateTri","400 g"],["cebolla","1"],["zanahoria","1"]],basic:"2 dientes de ajo, 1 hoja de laurel, orégano, 1 cucharada de aceite y sal",
+    steps:["Pica muy fino la cebolla, la zanahoria y el ajo y póchalos con el aceite 8 minutos a fuego medio.","Sube el fuego, añade la carne picada con sal y remueve 5 minutos hasta que pierda el color rosado.","Echa el tomate, el laurel, el orégano y un vaso de agua. Tapa y cuece 40 minutos a fuego suave, removiendo de vez en cuando.","Cuece la pasta el tiempo del paquete y mézclala con el ragú."],
+    tip:"Pide en la carnicería que te piquen la parte más magra. Lo que sobre de ragú se congela bien."},
+  pastaAceitunas:{n:"Pasta con atún, tomate y aceitunas",pool:"m",cat:"pas",t:"20 min",r:"1 ración",base:"#C9573E",em:["🍝","🐟","🫒"],
+    ing:[["pasta","80 g"],["atun","1 lata"],["tomateTri","150 g"],["aceitunas","8 aceitunas"]],basic:"1 diente de ajo, orégano, 1 cucharada de aceite",
+    steps:["Cuece la pasta el tiempo del paquete.","Mientras, sofríe el ajo laminado con el aceite 1 minuto y añade el tomate y el orégano. Cocina 8 minutos.","Añade las aceitunas en rodajas y el atún escurrido y calienta 2 minutos.","Mézclalo con la pasta escurrida."],
+    tip:"No le hace falta sal: las aceitunas ya la ponen."},
+  cuscusHummus:{n:"Cuscús con verduras asadas y hummus",pool:"m",cat:"leg",t:"30 min",r:"1 ración",base:"#E7C66B",em:["🫑","🥒"],
+    ing:[["cuscus","70 g"],["hummus","3 cucharadas"],["calabacin","½"],["pimiento","½"],["cebolla","¼"]],basic:"Comino, 1 cucharada de aceite y sal",
+    steps:["Precalienta el horno a 200 °C. Corta las verduras en dados, alíñalas con el aceite, comino y sal y ásalas 20 minutos.","Pon el cuscús en un bol con el mismo volumen de agua hirviendo y una pizca de sal. Tapa 5 minutos y suéltalo con un tenedor.","Mezcla el cuscús con las verduras.","Sirve con el hummus por encima."]},
+
+  /* Comidas y cenas rápidas */
+  wrapHummus:{n:"Wrap de pollo con hummus y pepino",pool:"m",cat:"car",t:"15 min",r:"1 ración",base:null,em:["🫓","🍗","🥒"],
+    ing:[["tortillas","2"],["pollo","120 g"],["hummus","3 cucharadas"],["pepino","½"],["lechuga","unas hojas"]],basic:"Pimentón, unas gotas de aceite y sal",
+    steps:["Corta el pollo en tiras, sálalo con pimentón y hazlo a la plancha con unas gotas de aceite 5–6 minutos.","Corta el pepino en bastones finos.","Unta las tortillas con el hummus y reparte la lechuga, el pepino y el pollo.","Enróllalas apretando bien y pártelas por la mitad."]},
+  tortitasMaizAtun:{n:"Tortitas de maíz con atún, tomate y aguacate",pool:"m",cat:"pes",t:"5 min",r:"1 ración",base:null,em:["🐟","🥑","🍅"],
+    ing:[["tortitasMaiz","4 tortitas"],["atun","1 lata"],["tomate","1"],["aguacate","½"]],basic:"Unas gotas de limón o vinagre y sal",
+    steps:["Aplasta el aguacate con un tenedor, unas gotas de limón y sal.","Escurre el atún y corta el tomate en dados.","Unta las tortitas con el aguacate y pon encima el atún y el tomate justo antes de comer."],
+    tip:"Cena de 5 minutos sin encender el fuego."},
+  ensaladaGriega:{n:"Ensalada de pepino, tomate, aceitunas y queso fresco",pool:"m",cat:"ver",t:"10 min",r:"1 ración",base:null,em:["🥒","🍅","🫒"],
+    ing:[["pepino","1"],["tomate","2"],["cebolla","¼"],["aceitunas","8 aceitunas"],["quesoBurgos","80 g"]],basic:"Orégano, 1 cucharada de aceite, vinagre y sal",
+    steps:["Corta el pepino y los tomates en dados y la cebolla en tiras muy finas.","Añade las aceitunas y el queso fresco en dados.","Aliña con el aceite, un chorrito de vinagre, orégano y una pizca de sal (las aceitunas ya son saladas)."],
+    tip:"Como la griega, pero con queso fresco 0% en vez de feta: mucha menos grasa y sal."},
+  gazpacho:{n:"Gazpacho",pool:"m",cat:"ver",t:"15 min",r:"2 raciones",base:"#D9573C",em:["🍅","🥒","🫑"],
+    ing:[["tomate","4 maduros"],["pepino","½"],["pimiento","½"],["cebolla","¼"],["pan","1 rebanada"]],basic:"1 diente de ajo, 2 cucharadas de aceite, 1 cucharada de vinagre y sal",
+    steps:["Trocea los tomates, el pepino pelado, el pimiento, la cebolla y el ajo.","Ponlo todo en el vaso de la batidora con el pan, el aceite, el vinagre, sal y un vaso de agua fría.","Tritura 2 minutos, hasta que quede muy fino. Si lo quieres más ligero, añade más agua.","Guárdalo en la nevera al menos 1 hora y sírvelo bien frío."],
+    tip:"Dura 2–3 días en la nevera. Si queda pepino, pícalo y ponlo por encima."},
+  cremaPuerro:{n:"Crema de puerro y patata",pool:"m",cat:"ver",t:"30 min",r:"2 raciones",base:"#E8E2B8",em:["🥔","🥛"],
+    ing:[["puerro","2"],["patata","2"],["cebolla","½"],["leche","200 ml"]],basic:"1 cucharada de aceite y sal",
+    steps:["Lava bien los puerros (la tierra se queda entre las capas) y córtalos en rodajas, la parte blanca y la verde clara.","Pócalos con la cebolla y el aceite 8 minutos a fuego medio-bajo.","Añade la patata en trozos, cubre justo con agua y sala. Cuece 15 minutos.","Añade la leche y tritura hasta que quede fina."],
+    tip:"Cremosa con leche semidesnatada, sin nata. Fría es una vichyssoise."},
+  merluzaPuerro:{n:"Merluza en papillote con puerro y zanahoria",pool:"m",cat:"pes",t:"25 min",r:"1 ración",base:null,em:["🐟","🥕","🍋"],
+    ing:[["merluza","200 g"],["puerro","1"],["zanahoria","1"],["limon","½"]],basic:"1 cucharada de aceite y sal",
+    steps:["Precalienta el horno a 200 °C. Descongela la merluza la noche antes en la nevera.","Corta el puerro y la zanahoria en tiras muy finas.","En un trozo grande de papel de horno pon la verdura, encima la merluza con sal, el aceite y unas rodajas de limón.","Cierra el papel doblando los bordes como un sobre y hornea 15 minutos."],
+    tip:"El pescado se hace en su vapor: queda jugoso con muy poco aceite."},
+  revueltoPuerro:{n:"Revuelto de puerro y champiñones",pool:"m",cat:"hue",t:"15 min",r:"1 ración",base:null,em:["🍳","🍄"],
+    ing:[["huevos","2"],["puerro","1"],["champis","100 g"]],basic:"1 cucharada de aceite y sal",
+    steps:["Corta el puerro en rodajas finas y póchalo con el aceite 6 minutos a fuego medio.","Añade los champiñones laminados y saltea 4 minutos.","Baja el fuego, echa los huevos batidos con sal y remueve 2 minutos, hasta que cuajen pero sigan jugosos."]},
 };
 
 /* ---------- Cantidades: cuánto de cada envase se gasta ----------
@@ -781,6 +859,7 @@ const PACK = {
   avena:{g:500,f:.05}, lentejas:{g:1000}, garbanzos:{n:2}, alubias:{n:1}, arroz:{g:1000}, pasta:{g:500}, fideos:{g:500},
   cuscus:{g:500}, quinoa:{g:500}, soja:{g:200}, pan:{n:20}, tortillas:{n:8}, tomateTri:{g:400,f:.1},
   caballa:{n:3}, atun:{n:3}, sardinas:{n:3}, mejillones:{n:3}, maiz:{n:3,f:.1}, nueces:{n:40},
+  corzo:{g:500}, jabali:{g:500}, aceitunas:{g:150,f:.15}, hummus:{g:240,f:.2}, tortitasMaiz:{n:20}, pepino:{n:3}, puerro:{n:3},
 };
 const FRAC = {"½":.5,"¼":.25,"¾":.75};
 function leadNum(s){
@@ -858,14 +937,14 @@ function cleanMenu(m){
 }
 
 /* ---------- Menús automáticos ---------- */
-const MEAT = ["pollo","pavo","lomo"], FISH = ["merluza","salmon","atun","caballa","sardinas","mejillones"], AZUL = ["salmon","caballa","sardinas"];
+const MEAT = ["pollo","pavo","lomo","corzo","jabali"], FISH = ["merluza","salmon","atun","caballa","sardinas","mejillones"], AZUL = ["salmon","caballa","sardinas"];
 const PROT_M = [...MEAT, ...FISH, "huevos","tofu","soja","lentejas","garbanzos","alubias","quesoBurgos"];
 const PROT_D = ["huevos","quesoBatido","quesoBurgos","atun","pavo"];
 const has = (rid, list) => R[rid].ing.some(([id])=>list.includes(id));
 const PRESETS = {
   colesterol:{n:"Bajo en colesterol",e:"💚",d:"Legumbre 5 veces, pescado azul, avena y mucha verdura. Poco huevo, sin embutido ni carne roja.",
     main:{leg:5,pes:4,ver:3,pas:1,car:1}, azul:2,
-    okM:(k)=>!has(k,["lomo"]) && (R[k].cat!=="hue"), okD:(k)=>!has(k,["huevos","pavo"])},
+    okM:(k)=>!has(k,["lomo","corzo","jabali"]) && (R[k].cat!=="hue"), okD:(k)=>!has(k,["huevos","pavo"])},
   proteina:{n:"Rico en proteína",e:"💪",d:"Carne magra, pescado, huevos o legumbre en cada plato, y desayunos con huevo o queso batido.",
     main:{car:5,pes:4,hue:2,leg:3},
     okM:(k)=>has(k,PROT_M), okD:(k)=>has(k,PROT_D)},
@@ -874,7 +953,7 @@ const PRESETS = {
     okM:()=>true, okD:()=>true},
   economico:{n:"Económico",e:"💶",d:"Los platos más baratos por ración: legumbres, huevos, pasta, arroz y latas.",
     main:{leg:5,hue:3,pas:3,ver:2,pes:1}, cheap:true,
-    okM:(k)=>!has(k,["salmon","lomo","quinoa","aguacate","mejillones"]), okD:(k)=>!has(k,["aguacate","frutos","quesoBatido","kiwi"])},
+    okM:(k)=>!has(k,["salmon","lomo","quinoa","aguacate","mejillones","corzo","jabali"]), okD:(k)=>!has(k,["aguacate","frutos","quesoBatido","kiwi"])},
   vegetariano:{n:"Vegetariano",e:"🥕",d:"Sin carne ni pescado. La proteína viene de legumbres, tofu, soja, huevos y lácteos.",
     main:{leg:6,hue:3,ver:3,pas:2},
     okM:(k)=>!has(k,[...MEAT,...FISH]), okD:(k)=>!has(k,[...MEAT,...FISH])},

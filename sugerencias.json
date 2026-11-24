@@ -1,1 +1,14 @@
-[]
+[
+  {"texto": "cabirol", "estado": "añadido", "nota": "Añadido el 24/11 como Corzo (cabirol) con 2 recetas: guiso de corzo con patatas y filetes de corzo con pimientos. Es carne roja muy magra: como mucho una vez por semana.", "fecha": "2026-11-24"},
+  {"texto": "jabalí", "estado": "añadido", "nota": "Añadido el 24/11 con 2 recetas: jabalí guisado con champiñones y pasta con ragú de jabalí. Carne roja magra: como mucho una vez por semana.", "fecha": "2026-11-24"},
+  {"texto": "jamon york", "estado": "descartado", "nota": "Es fiambre procesado (embutido), con mucha sal. Para tostadas, mejor la tostada con pavo a la plancha.", "fecha": "2026-11-24"},
+  {"texto": "queso bajo en sal", "estado": "duplicado", "nota": "Ya están el Queso fresco de Burgos 0% y el queso batido 0%, que son los quesos buenos para el colesterol. Un queso tierno o semicurado bajo en sal sigue teniendo mucha grasa saturada.", "fecha": "2026-11-24"},
+  {"texto": "aceitunas", "estado": "añadido", "nota": "Añadido el 24/11 con 3 recetas: tostada con queso fresco, tomate y aceitunas; pasta con atún, tomate y aceitunas; ensalada de pepino, tomate, aceitunas y queso fresco.", "fecha": "2026-11-24"},
+  {"texto": "hummus", "estado": "añadido", "nota": "Añadido el 24/11 (de tarrina; el casero ya estaba como receta) con 3 recetas: tostada con hummus y tomate, wrap de pollo con hummus y pepino, cuscús con verduras asadas y hummus.", "fecha": "2026-11-24"},
+  {"texto": "tortitas de maiz", "estado": "añadido", "nota": "Añadido el 24/11 con 3 recetas: tortitas con queso fresco y tomate, tortitas con hummus y pepino, y cena de tortitas con atún, tomate y aguacate.", "fecha": "2026-11-24"},
+  {"texto": "alubias", "estado": "duplicado", "nota": "Ya estaba como Alubias cocidas (con 6 recetas).", "fecha": "2026-11-24"},
+  {"texto": "Parmesano en polvo", "estado": "descartado", "nota": "Es queso curado: mucha grasa saturada y sal. Para la pasta, mejor orégano, ajo o una pizca de guindilla.", "fecha": "2026-11-24"},
+  {"texto": "pepino", "estado": "añadido", "nota": "Añadido el 24/11 con gazpacho y ensalada de pepino, tomate, aceitunas y queso fresco (y va en el wrap de hummus y en las tortitas de maíz).", "fecha": "2026-11-24"},
+  {"texto": "puerro", "estado": "añadido", "nota": "Añadido el 24/11 con 3 recetas: crema de puerro y patata, merluza en papillote con puerro y zanahoria, revuelto de puerro y champiñones.", "fecha": "2026-11-24"},
+  {"texto": "tomate cherry", "estado": "duplicado", "nota": "Ya estaba como Tomates: los cherry sirven en cualquier receta con tomate.", "fecha": "2026-11-24"}
+]
