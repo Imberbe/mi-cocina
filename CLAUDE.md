@@ -10,6 +10,7 @@ Pensada para bajar el colesterol y con poco presupuesto. Todo en español de Esp
 - `index.html`, `sw.js`, `manifest.webmanifest`, iconos — la app instalable de GitHub Pages
   (https://imberbe.github.io/mi-cocina/). `index.html` NO se edita a mano: se genera con `python3 tools/build.py`.
 - `sugerencias.json` — historial de sugerencias revisadas, que la app del móvil lee para mostrar su estado.
+- Notion: página del proyecto https://app.notion.com/p/422bf473ede6817ebb2cdf3ee4f6e0bd con la base de datos «Registro de Mi cocina» (data source `collection://422bf473-ede6-8178-b1ba-000bee0a8e94`). **Todo cambio en la app se apunta ahí**: Entrada, Fecha, Tipo (Petición, Función nueva, Recetas, Arreglo, Publicación, Automático, Decisión), Quién (Alejandro, Claude, Tarea del jueves) y Detalle.
 
 ## Cómo está hecha `src/mi-cocina.html`
 
@@ -41,4 +42,5 @@ Pensada para bajar el colesterol y con poco presupuesto. Todo en español de Esp
    - En la base de datos, actualiza cada sugerencia con `estado` (`añadido` | `duplicado` | `descartado`) y `nota` corta (p. ej. "Añadido el 26/11 con 3 recetas: …" o "Ya estaba como Brócoli").
    - Añade lo mismo a `sugerencias.json` (`[{texto, estado, nota, fecha}]`).
    - Comenta y cierra cada issue de GitHub procesado.
-7. Si no hay sugerencias pendientes, no cambies nada.
+7. Apunta la revisión en el registro de Notion (Quién «Tarea del jueves», Tipo «Automático»), y las recetas nuevas en otra entrada de Tipo «Recetas».
+8. Si no hay sugerencias pendientes, no cambies la app: solo apunta en el registro que no había ninguna.
