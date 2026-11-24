@@ -207,6 +207,21 @@ nav.tabs .badge{background:var(--miss);color:#fff;border-radius:999px;font-size:
 .opt[aria-pressed="true"] .obox{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .selbox{margin-top:12px;display:grid;gap:6px}
 .warnbox{margin:10px 0 0;border-radius:12px;padding:8px 12px;background:var(--miss-soft);color:var(--miss);font-size:.85rem;font-weight:600}
+.cfgline{margin:2px 0 0;font-family:var(--f-display);font-weight:700;font-size:1.05rem}
+.wz{display:grid;gap:4px;clear:both;padding-top:2px}
+.wstep{display:grid;gap:10px;animation:wizin .28s ease-out;min-height:300px;align-content:start}
+@keyframes wizin{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
+.wzpeople{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.wzpeople button{border:1.5px solid var(--line);background:var(--bg);border-radius:var(--r);padding:14px 4px;display:grid;gap:2px;justify-items:center}
+.wzpeople b{font-family:var(--f-display);font-size:1.6rem;line-height:1}
+.wzpeople small{color:var(--muted);font-size:.72rem}
+.wzpeople button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.wzopts{display:grid;gap:8px}
+.wzsum{display:grid;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.wzrow{display:flex;justify-content:space-between;gap:12px;padding:10px 12px;border-top:1px solid var(--line);font-size:.9rem}
+.wzrow:first-child{border-top:0}
+.wzrow span{color:var(--muted);flex:none}
+.wzrow b{text-align:right;min-width:0}
 .summary2{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;display:grid;gap:8px}
 </style>
 
@@ -237,7 +252,7 @@ nav.tabs .badge{background:var(--miss);color:#fff;border-radius:999px;font-size:
 
   <section class="view" id="v-semana" aria-label="Semana" hidden>
     <h2 style="margin-bottom:12px">Menú de la semana</h2>
-    <p class="weekhint">Elige cuántos sois y las opciones del menú automático, o toca cualquier plato para cambiarlo. La lista de la compra se ajusta sola.</p>
+    <p class="weekhint">Pulsa «Crear menú» para elegir personas y opciones paso a paso, o toca cualquier plato para cambiarlo. La lista de la compra se ajusta sola.</p>
     <div id="cfgBox"></div>
     <div id="weekBox"></div>
     <div class="reset" id="menuResetBox"></div>
@@ -1287,27 +1302,63 @@ function ideasBox(pool, exclude, fuera){
 
 /* ---------- Semana ---------- */
 function renderConfig(){
-  const same = applied && applied.length===opts.length && applied.every(k=>opts.includes(k));
-  const groups = GROUPS.map((g,gi)=>`<fieldset class="ogroup"><legend>${g.n}</legend><p class="legend" style="margin:0 0 8px">${g.d}</p>${g.o.map(k=>{
-      const o = OPTS[k], on = opts.includes(k);
-      return `<button type="button" class="opt" data-opt="${k}" aria-pressed="${on}"><span class="obox" aria-hidden="true">${on?"✓":""}</span><span class="oe" aria-hidden="true">${o.e}</span><span class="otx"><b>${o.n}</b><small>${o.d}</small></span></button>`;
-    }).join("")}</fieldset>`).join("");
-  const sel = opts.length ? opts.map(k=>`<span class="chip">${OPTS[k].e} ${OPTS[k].n}</span>`).join("") : `<span class="legend" style="margin:0">Ninguna: menú variado, de todo un poco.</span>`;
-  const warn = (opts.includes("vegetariano") && opts.includes("proteina")) ? `<p class="legend" style="margin:6px 0 0">Rico en proteína y vegetariano: la proteína saldrá de legumbres, tofu, soja y huevo.</p>` : "";
-  const action = confirmOpts
-    ? `<div class="confirm"><span>Se cambiará todo el menú de la semana por uno <b>${esc(optsLabel(opts))}</b>.</span><div class="quick"><button class="btn primary" id="optsYes">Crear menú</button><button class="btn" id="optsNo">Cancelar</button></div></div>`
-    : `<div class="quick" style="margin-top:12px"><button class="btn primary" id="optsAsk">${same ? "🔀 Otra combinación" : "Crear menú"}</button></div>`;
+  const sel = applied ? applied : [];
+  const chips = sel.length ? sel.map(k=>`<span class="chip">${OPTS[k].e} ${OPTS[k].n}</span>`).join("") : `<span class="legend" style="margin:0">${applied ? "Variado, de todo un poco" : "Todavía no has creado un menú automático: ahora tienes el menú inicial."}</span>`;
   $("cfgBox").innerHTML = `
-    <div class="cfgrow"><h3>Personas</h3><div class="seg" role="group" aria-label="Número de personas">${[1,2,3,4].map(n=>`<button data-personas="${n}" aria-pressed="${personas===n}">${n}</button>`).join("")}</div></div>
-    <p class="legend" style="margin:6px 0 14px">Las recetas y la lista de la compra se calculan para ${personas} ${personas===1?"persona":"personas"}.</p>
-    <h3>Menú automático</h3>
-    <p class="legend" style="margin:4px 0 10px">Marca en cada sección las opciones que quieras, todas o ninguna. Se combinan y te monto la semana entera; después puedes cambiar cualquier plato.</p>
-    ${groups}
-    <label class="check"><input type="checkbox" id="fueraFinde" ${fueraFinde?"checked":""}> El sábado y el domingo como y ceno fuera</label>
-    <div class="selbox"><span class="eyebrow">Tu selección</span><div class="chips">${sel}</div>${warn}</div>
-    ${action}
-    ${applied ? `<p class="legend" style="margin:8px 0 0">Menú actual: ${esc(optsLabel(applied))}.</p>` : ""}
+    <div class="cfgsum"><div><span class="eyebrow">Tu menú</span><p class="cfgline">${personas} ${personas===1?"persona":"personas"}${fueraFinde?" · fin de semana fuera":""}</p></div></div>
+    <div class="chips" style="margin-top:6px">${chips}</div>
+    <div class="quick" style="margin-top:12px"><button class="btn primary" id="wzOpen">✨ Crear menú</button>${applied ? `<button class="btn" id="optsAgain">🔀 Otra combinación</button>` : ""}</div>
     <div class="summary2"><span class="eyebrow">Tu semana ahora</span>${weekSummary()}</div>`;
+}
+
+/* ---------- Asistente para crear el menú: un paso cada vez ---------- */
+let wz = null;
+const WZ_STEPS = 5; /* 0 personas · 1-3 secciones · 4 resumen */
+function openWizard(){
+  wz = {step:0, personas, opts:[...opts], fuera:fueraFinde};
+  mode = "wiz"; openSheet(); renderWizard();
+}
+function renderWizard(){
+  const st = wz.step;
+  const dots = Array.from({length:WZ_STEPS},(_,i)=>`<i class="${i<=st?"on":""}"></i>`).join("");
+  let body = "";
+  if (st===0){
+    body = `<h2 id="rTitle">¿Para cuántas personas?</h2>
+      <p class="legend">Las recetas y la lista de la compra se calculan para este número.</p>
+      <div class="wzpeople" role="group" aria-label="Número de personas">${[1,2,3,4].map(n=>`<button data-wp="${n}" aria-pressed="${wz.personas===n}"><b>${n}</b><small>${n===1?"persona":"personas"}</small></button>`).join("")}</div>`;
+  } else if (st<=3){
+    const g = GROUPS[st-1];
+    body = `<h2 id="rTitle">${g.n}</h2>
+      <p class="legend">${g.d} Marca las que quieras, todas o ninguna.</p>
+      <div class="wzopts">${g.o.map(k=>{
+        const o = OPTS[k], on = wz.opts.includes(k);
+        return `<button type="button" class="opt" data-wopt="${k}" aria-pressed="${on}"><span class="obox" aria-hidden="true">${on?"✓":""}</span><span class="oe" aria-hidden="true">${o.e}</span><span class="otx"><b>${o.n}</b><small>${o.d}</small></span></button>`;
+      }).join("")}</div>`;
+  } else {
+    const rows = GROUPS.map(g=>{
+      const chosen = g.o.filter(k=>wz.opts.includes(k));
+      return `<div class="wzrow"><span>${g.n}</span><b>${chosen.length ? chosen.map(k=>OPTS[k].e+" "+OPTS[k].n).join(", ") : "Ninguna"}</b></div>`;
+    }).join("");
+    const warn = (wz.opts.includes("vegetariano") && wz.opts.includes("proteina")) ? `<p class="legend" style="margin:8px 0 0">Rico en proteína y vegetariano: la proteína saldrá de legumbres, tofu, soja y huevo.</p>` : "";
+    body = `<h2 id="rTitle">Tu menú</h2>
+      <div class="wzsum"><div class="wzrow"><span>Personas</span><b>${wz.personas}</b></div>${rows}</div>
+      ${!wz.opts.length ? `<p class="legend" style="margin:8px 0 0">Sin opciones marcadas: será un menú variado, de todo un poco.</p>` : ""}${warn}
+      <label class="check"><input type="checkbox" id="wFuera" ${wz.fuera?"checked":""}> El sábado y el domingo como y ceno fuera</label>
+      <p class="legend" style="margin:10px 0 0">Al finalizar se cambia el menú de toda la semana. Después puedes cambiar cualquier plato.</p>`;
+  }
+  const back = st>0 ? `<button class="btn" id="wzBack">‹ Atrás</button>` : `<span></span>`;
+  const next = st<WZ_STEPS-1 ? `<button class="btn primary" id="wzNext">Siguiente ›</button>` : `<button class="btn primary" id="wzFinish">✓ Finalizar</button>`;
+  $("panel").innerHTML = `<button class="close" id="rClose" aria-label="Cerrar sin cambiar el menú">✕</button>
+    <div class="wz"><div class="eyebrow">Crear menú · paso ${st+1} de ${WZ_STEPS}</div><div class="prog">${dots}</div>
+    <div class="wstep" key="${st}">${body}</div>
+    <div class="stepnav">${back}${next}</div></div>`;
+}
+function finishWizard(){
+  personas = wz.personas; opts = [...wz.opts]; fueraFinde = wz.fuera; applied = [...opts];
+  seed = Math.floor(Math.random()*1e9); menu = buildMenu(applied, seed, fueraFinde);
+  saveMenu(); wz = null;
+  $("sheet").hidden = true; mode = null; document.body.style.overflow="";
+  renderAll();
 }
 function renderWeek(){
   renderConfig();
@@ -1374,6 +1425,7 @@ function show(v){
 let mode = null, cur = null, stepI = 0, showAll = false, pick = null, pickCat = "all", pickQ = "", backToPick = false;
 function openSheet(){ $("sheet").hidden = false; document.body.style.overflow="hidden"; $("panel").scrollTop = 0; }
 function closeSheet(){
+  if (mode==="wiz"){ wz = null; $("sheet").hidden = true; mode = null; document.body.style.overflow=""; return; }
   if (mode==="recipe" && backToPick && pick){ backToPick = false; mode = "pick"; renderPicker(); return; }
   $("sheet").hidden = true; mode = null; cur = null; pick = null; backToPick = false; document.body.style.overflow="";
 }
@@ -1588,7 +1640,8 @@ document.addEventListener("click", (e) => {
   if (t.dataset.slot) { const [i,m] = t.dataset.slot.split("-"); return openPicker(i, m); }
   if (t.dataset.toggle) return toggle(t.dataset.toggle);
   if (t.dataset.personas) { personas = +t.dataset.personas; saveMenu(); return renderAll(); }
-  if (t.dataset.opt) { const k = t.dataset.opt; opts = opts.includes(k) ? opts.filter(x=>x!==k) : [...opts, k]; confirmOpts = false; saveMenu(); return renderConfig(); }
+  if (t.dataset.wopt && wz) { const k = t.dataset.wopt; wz.opts = wz.opts.includes(k) ? wz.opts.filter(x=>x!==k) : [...wz.opts, k]; return renderWizard(); }
+  if (t.dataset.wp && wz) { wz.personas = +t.dataset.wp; return renderWizard(); }
   if (t.dataset.cat) { pickCat = t.dataset.cat; document.querySelectorAll("#pCats button").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.cat===pickCat))); return renderPickList(); }
   if (t.dataset.f) { filter = t.dataset.f; return renderShop(); }
   if (t.dataset.m) { const ni = nowInfo(); override = {dayIdx: (override||ni).dayIdx, m: t.dataset.m}; return renderNow(); }
@@ -1604,9 +1657,11 @@ document.addEventListener("click", (e) => {
     case "pFuera": return setSlot({fuera:true});
     case "pSobras": { const prev = menu[(pick.i+6)%7][pick.m]; return setSlot({r:prev.r, sobras:true}); }
     case "pBase": return setSlot(clone(MENU_BASE[pick.i][pick.m]));
-    case "optsAsk": confirmOpts = true; renderConfig(); { const c = document.querySelector(".confirm"); if (c) c.scrollIntoView({block:"nearest", behavior:"smooth"}); } return;
-    case "optsNo": confirmOpts = false; return renderConfig();
-    case "optsYes": confirmOpts = false; applied = [...opts]; seed = Math.floor(Math.random()*1e9); menu = buildMenu(applied, seed, fueraFinde); saveMenu(); return renderAll();
+    case "wzOpen": return openWizard();
+    case "wzNext": wz.step = Math.min(WZ_STEPS-1, wz.step+1); return renderWizard();
+    case "wzBack": wz.step = Math.max(0, wz.step-1); return renderWizard();
+    case "wzFinish": return finishWizard();
+    case "optsAgain": seed = Math.floor(Math.random()*1e9); menu = buildMenu(applied, seed, fueraFinde); saveMenu(); return renderAll();
     case "menuAsk": confirmMenu = true; return renderWeek();
     case "menuNo": confirmMenu = false; return renderWeek();
     case "menuYes": confirmMenu = false; menu = clone(MENU_BASE); applied = null; saveMenu(); return renderAll();
@@ -1617,6 +1672,7 @@ document.addEventListener("click", (e) => {
   }
 });
 document.addEventListener("change", (e) => {
+  if (e.target.id==="wFuera" && wz){ wz.fuera = e.target.checked; return; }
   if (e.target.id==="fueraFinde"){ fueraFinde = e.target.checked; if (applied){ menu = buildMenu(applied, seed, fueraFinde); } saveMenu(); renderAll(); }
 });
 document.addEventListener("input", (e) => { if (e.target.id==="pSearch") { pickQ = e.target.value; renderPickList(); } });
