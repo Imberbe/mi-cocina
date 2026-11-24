@@ -206,6 +206,18 @@ nav.tabs .badge{background:var(--miss);color:#fff;border-radius:999px;font-size:
 .sugrow .estado.dup{background:var(--miss-soft);color:var(--miss);border-color:transparent}
 .sugrow .del{border:0;background:none;color:var(--muted);font-size:16px;padding:2px 6px}
 .sendlink{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--accent-ink);background:var(--accent);border-radius:999px;padding:8px 14px;font-weight:600;font-size:.85rem}
+.ogroup{border:1px solid var(--line);border-radius:var(--r);padding:10px 12px 12px;margin:0 0 10px;display:grid;gap:6px;min-width:0}
+.ogroup legend{font-family:var(--f-display);font-weight:700;padding:0 4px}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:left;width:100%;border:1.5px solid var(--line);background:var(--bg);border-radius:12px;padding:8px 10px}
+.opt .obox{flex:none;width:22px;height:22px;border-radius:6px;border:1.5px solid var(--line);display:grid;place-items:center;font-size:13px;font-weight:700;margin-top:1px}
+.opt .oe{font-size:20px;line-height:1.2;flex:none}
+.opt .otx{min-width:0;display:grid;gap:1px}
+.opt b{font-size:.95rem}
+.opt small{color:var(--muted);font-size:.76rem;line-height:1.35}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt[aria-pressed="true"] .obox{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.selbox{margin-top:12px;display:grid;gap:6px}
+.warnbox{margin:10px 0 0;border-radius:12px;padding:8px 12px;background:var(--miss-soft);color:var(--miss);font-size:.85rem;font-weight:600}
 .summary2{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;display:grid;gap:8px}
 </style>
 
@@ -236,7 +248,7 @@ nav.tabs .badge{background:var(--miss);color:#fff;border-radius:999px;font-size:
 
   <section class="view" id="v-semana" aria-label="Semana" hidden>
     <h2 style="margin-bottom:12px">Menú de la semana</h2>
-    <p class="weekhint">Elige cuántos sois y un estilo de menú, o toca cualquier plato para cambiarlo. La lista de la compra se ajusta sola.</p>
+    <p class="weekhint">Elige cuántos sois y las opciones del menú automático, o toca cualquier plato para cambiarlo. La lista de la compra se ajusta sola.</p>
     <div id="cfgBox"></div>
     <div id="weekBox"></div>
     <div class="reset" id="menuResetBox"></div>
@@ -357,8 +369,8 @@ const icon = (id) => ING[id].svg || ING[id].e;
 /* ---------- Recetario ----------
    pool: d = desayuno, m = comida o cena.  cat: tipo de plato para filtrar. */
 const CATS = {
-  d:[["all","Todos"],["ok","Lo tengo todo"],["prot","Con proteína"],["rap","Rápidos"],["dulce","Dulces"],["salado","Salados"]],
-  m:[["all","Todos"],["ok","Lo tengo todo"],["prot","Ricos en proteína"],["rap","Rápidos"],["vegg","Vegetarianos"],["leg","Legumbres y soja"],["pes","Pescado"],["car","Carne magra"],["hue","Huevos"],["ver","Verduras"],["pas","Pasta, arroz y cereales"]],
+  d:[["all","Todos"],["ok","Lo tengo todo"],["colok","Aptos para el colesterol"],["bajosal","Bajos en sal"],["prot","Con proteína"],["rap","Rápidos"],["dulce","Dulces"],["salado","Salados"]],
+  m:[["all","Todos"],["ok","Lo tengo todo"],["colok","Aptos para el colesterol"],["bajosal","Bajos en sal"],["prot","Ricos en proteína"],["rap","Rápidos"],["vegg","Vegetarianos"],["leg","Legumbres y soja"],["pes","Pescado"],["car","Carne magra"],["hue","Huevos"],["ver","Verduras"],["pas","Pasta, arroz y cereales"]],
 };
 const R = {
   /* Desayunos */
@@ -872,6 +884,42 @@ const PACK = {
   caballa:{n:3}, atun:{n:3}, sardinas:{n:3}, mejillones:{n:3}, maiz:{n:3,f:.1}, nueces:{n:40},
   corzo:{g:500}, jabali:{g:500}, aceitunas:{g:150,f:.15}, hummus:{g:240,f:.2}, tortitasMaiz:{n:20}, pepino:{n:3}, puerro:{n:3},
 };
+
+/* ---------- Alimentos y recetas que no van en el menú bajo en colesterol ----------
+   col:false = no recomendado si tienes el colesterol alto (el menú «Bajo en colesterol» no lo usa).
+   Ningún alimento se descarta: así hay platos de todo tipo para otras personas o para más adelante. */
+Object.assign(ING, {
+  jamonYork:{n:"Jamón york (cocido)",svg:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="7" y="13" width="34" height="23" rx="11" fill="#F2B3B0" stroke="#D98C88" stroke-width="1.5"/><rect x="11" y="17" width="26" height="15" rx="7.5" fill="#F7CFCB"/></svg>`,q:"sobre 200 g",p:2.2,s:"fresco",col:false},
+  quesoTierno:{n:"Queso tierno bajo en sal",e:"🧀",q:"cuña 250 g",p:3.2,s:"fresco",col:false},
+  parmesano:{n:"Parmesano en polvo",svg:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="14" y="8" width="20" height="7" rx="2" fill="#2F6F3E"/><rect x="12" y="14" width="24" height="29" rx="5" fill="#F4E3A6" stroke="#D9C277" stroke-width="1.5"/><rect x="15" y="22" width="18" height="10" rx="2" fill="#fff"/></svg>`,q:"bote 80 g",p:2.3,s:"despensa",col:false},
+});
+Object.assign(PACK, { jamonYork:{g:200}, quesoTierno:{g:250}, parmesano:{g:80,f:.12} });
+["corzo","jabali"].forEach(id=>{ if (ING[id]) ING[id].col = false; });
+["corzoGuiso","corzoPlancha","jabaliGuiso","pastaJabali"].forEach(k=>{ if (R[k]) R[k].col = false; });
+Object.assign(R, {
+  tostadaYork:{n:"Tostada con jamón york y tomate",pool:"d",cat:"salado",t:"4 min",r:"1 ración",base:null,em:["🍞","🍅"],col:false,
+    ing:[["pan","2 rebanadas"],["jamonYork","40 g"],["tomate","½"]],basic:"Unas gotas de aceite",
+    steps:["Tuesta el pan y frótalo con el tomate.","Pon encima las lonchas de jamón york.","Un chorrito de aceite y listo; no hace falta sal: el jamón ya la lleva."]},
+  tostadaQuesoTierno:{n:"Tostada con queso tierno y tomate",pool:"d",cat:"salado",t:"4 min",r:"1 ración",base:null,em:["🍞","🧀","🍅"],col:false,
+    ing:[["pan","2 rebanadas"],["quesoTierno","40 g"],["tomate","½"]],basic:"Orégano y unas gotas de aceite",
+    steps:["Tuesta el pan y frótalo con el tomate.","Pon el queso en lonchas finas.","Termina con orégano y unas gotas de aceite."]},
+  sandwichMixto:{n:"Sándwich mixto con ensalada",pool:"m",cat:"car",t:"8 min",r:"1 ración",base:null,em:["🥪","🥗"],col:false,
+    ing:[["pan","2 rebanadas"],["jamonYork","40 g"],["quesoTierno","30 g"],["lechuga","unas hojas"],["tomate","1"]],basic:"Unas gotas de aceite y vinagre",
+    steps:["Monta el sándwich con el jamón y el queso.","Tuéstalo en una sartén sin aceite, 2–3 minutos por cada lado, aplastándolo un poco, hasta que el queso se funda.","Sírvelo con una ensalada de lechuga y tomate."]},
+  tortillaYork:{n:"Tortilla francesa de jamón york y queso",pool:"m",cat:"hue",t:"8 min",r:"1 ración",base:"#E8C95A",em:["🥚","🧀"],col:false,
+    ing:[["huevos","2"],["jamonYork","30 g"],["quesoTierno","30 g"],["lechuga","unas hojas"]],basic:"Unas gotas de aceite",
+    steps:["Bate los huevos.","Cuájalos en una sartén antiadherente con unas gotas de aceite, 1 minuto.","Pon el jamón y el queso en tiras sobre una mitad, dobla la tortilla y deja 1 minuto más para que se funda.","Sírvela con lechuga."]},
+  ensaladaPastaYork:{n:"Ensalada de pasta con jamón york y queso",pool:"m",cat:"pas",t:"20 min",r:"1 ración",base:null,em:["🍝","🧀","🌽"],col:false,
+    ing:[["pasta","70 g"],["jamonYork","50 g"],["quesoTierno","40 g"],["tomate","1"],["maiz","2 cucharadas"]],basic:"Aceite, vinagre y orégano",
+    steps:["Cuece la pasta, escúrrela y pásala por agua fría.","Corta el jamón, el queso y el tomate en dados.","Mézclalo todo con el maíz y aliña."]},
+  pastaParmesano:{n:"Espaguetis con tomate y parmesano",pool:"m",cat:"pas",t:"20 min",r:"1 ración",base:"#C9573E",em:["🍝","🧀"],col:false,
+    ing:[["pasta","80 g"],["tomateTri","200 g"],["cebolla","¼"],["parmesano","2 cucharadas"]],basic:"Ajo, orégano o albahaca, 1 cucharada de aceite y sal",
+    steps:["Cuece la pasta el tiempo del paquete.","Sofríe la cebolla y el ajo picados 4 minutos, añade el tomate y el orégano y cocina 8 minutos.","Mezcla la pasta con la salsa y espolvorea el parmesano por encima."]},
+  calabacinGratinado:{n:"Calabacín gratinado con tomate y parmesano",pool:"m",cat:"ver",t:"30 min",r:"1 ración",base:null,em:["🥒","🧀","🍅"],col:false,
+    ing:[["calabacin","1"],["tomateTri","100 g"],["parmesano","2 cucharadas"]],basic:"Orégano, 1 cucharada de aceite y sal",
+    steps:["Precalienta el horno a 200 °C con el grill.","Corta el calabacín en rodajas y ponlas en una fuente con aceite y sal. Hornea 15 minutos.","Cubre con el tomate, el orégano y el parmesano.","Gratina 6–8 minutos hasta que se dore."]},
+});
+
 const FRAC = {"½":.5,"¼":.25,"¾":.75};
 function leadNum(s){
   const m = String(s).trim().match(/^(\d+(?:[.,]\d+)?|½|¼|¾)/);
@@ -952,35 +1000,71 @@ const MEAT = ["pollo","pavo","lomo","corzo","jabali"], FISH = ["merluza","salmon
 const PROT_M = [...MEAT, ...FISH, "huevos","tofu","soja","lentejas","garbanzos","alubias","quesoBurgos"];
 const PROT_D = ["huevos","quesoBatido","quesoBurgos","atun","pavo"];
 const has = (rid, list) => R[rid].ing.some(([id])=>list.includes(id));
-const PRESETS = {
-  colesterol:{n:"Bajo en colesterol",e:"💚",d:"Legumbre 5 veces, pescado azul, avena y mucha verdura. Poco huevo, sin embutido ni carne roja.",
-    main:{leg:5,pes:4,ver:3,pas:1,car:1}, azul:2,
-    okM:(k)=>!has(k,["lomo","corzo","jabali"]) && (R[k].cat!=="hue"), okD:(k)=>!has(k,["huevos","pavo"])},
-  proteina:{n:"Rico en proteína",e:"💪",d:"Carne magra, pescado, huevos o legumbre en cada plato, y desayunos con huevo o queso batido.",
-    main:{car:5,pes:4,hue:2,leg:3},
-    okM:(k)=>has(k,PROT_M), okD:(k)=>has(k,PROT_D)},
+/* Aptos para el colesterol y bajos en sal */
+const SALTY = ["atun","caballa","sardinas","mejillones","maiz","aceitunas","hummus","tortillas","jamonYork","parmesano","quesoTierno"];
+const colOk = (k) => R[k].col !== false && !R[k].ing.some(([id])=>ING[id] && ING[id].col===false);
+const salOk = (k) => R[k].sal !== false && !has(k, SALTY);
+
+/* ---------- Menú automático: tres secciones de opciones que se combinan ---------- */
+const OPTS = {
+  colesterol:{n:"Bajo en colesterol",e:"💚",d:"Legumbre, pescado azul, avena y verdura. Sin embutido, queso curado ni carne roja; poco huevo.",
+    w:{leg:5,pes:4,car:1,hue:0,ver:3,pas:1}, azul:2,
+    okM:(k)=>colOk(k) && !has(k,["lomo"]) && R[k].cat!=="hue", okD:(k)=>colOk(k) && !has(k,["huevos","pavo"])},
+  sal:{n:"Bajo en sal",e:"🧂",d:"Sin latas en conserva, aceitunas ni embutido. Se cocina con especias, ajo y limón.",
+    okM:salOk, okD:salOk},
   equilibrado:{n:"Equilibrado",e:"⚖️",d:"Lo que recomiendan las guías: legumbre y pescado 3–4 veces, carne blanca 2, huevos 2 y verdura.",
-    main:{leg:4,pes:4,car:2,hue:2,ver:1,pas:1}, azul:1,
-    okM:()=>true, okD:()=>true},
-  economico:{n:"Económico",e:"💶",d:"Los platos más baratos por ración: legumbres, huevos, pasta, arroz y latas.",
-    main:{leg:5,hue:3,pas:3,ver:2,pes:1}, cheap:true,
-    okM:(k)=>!has(k,["salmon","lomo","quinoa","aguacate","mejillones","corzo","jabali"]), okD:(k)=>!has(k,["aguacate","frutos","quesoBatido","kiwi"])},
-  vegetariano:{n:"Vegetariano",e:"🥕",d:"Sin carne ni pescado. La proteína viene de legumbres, tofu, soja, huevos y lácteos.",
-    main:{leg:6,hue:3,ver:3,pas:2},
-    okM:(k)=>!has(k,[...MEAT,...FISH]), okD:(k)=>!has(k,[...MEAT,...FISH])},
-  rapido:{n:"Rápido",e:"⏱️",d:"Todos los platos en 20 minutos o menos.",
-    main:{pes:4,leg:3,hue:3,car:2,ver:1,pas:1},
+    w:{leg:4,pes:4,car:2,hue:2,ver:1,pas:1}, azul:1},
+  proteina:{n:"Rico en proteína",e:"💪",d:"Carne magra, pescado, huevos o legumbre en cada plato; desayunos con huevo o queso batido.",
+    w:{leg:3,pes:4,car:5,hue:2,ver:0,pas:0},
+    okM:(k)=>has(k,PROT_M), okD:(k)=>has(k,PROT_D)},
+  vegetariano:{n:"Vegetariano",e:"🥕",d:"Sin carne ni pescado. Proteína de legumbres, tofu, soja, huevos y lácteos.",
+    w:{leg:6,pes:0,car:0,hue:3,ver:3,pas:2}, veg:true,
+    okM:(k)=>!has(k,[...MEAT,...FISH,"jamonYork"]), okD:(k)=>!has(k,[...MEAT,...FISH,"jamonYork"])},
+  rapido:{n:"Rápido",e:"⏱️",d:"Platos de 20 minutos o menos; desayunos de 10.",
     okM:(k)=>minutes(k)<=20, okD:(k)=>minutes(k)<=10},
-  pocococina:{n:"Cocinar poco",e:"🍲",d:"Comidas de 2 raciones: cocinas un día y al siguiente comes las sobras. Cenas rápidas.",
-    main:{leg:5,pes:4,car:2,hue:2,ver:1}, batch:true,
-    okM:()=>true, okD:(k)=>minutes(k)<=10},
+  pocococina:{n:"Cocinar poco",e:"🍲",d:"Comidas de 2 raciones: cocinas un día y al siguiente comes las sobras.",
+    batch:true, okD:(k)=>minutes(k)<=10},
+  economico:{n:"Económico",e:"💶",d:"Los platos más baratos por ración: legumbres, huevos, pasta, arroz y latas.",
+    w:{leg:5,pes:1,car:0,hue:3,ver:2,pas:3}, cheap:true,
+    okM:(k)=>!has(k,["salmon","lomo","quinoa","aguacate","mejillones","corzo","jabali"]), okD:(k)=>!has(k,["aguacate","frutos","quesoBatido","kiwi"])},
 };
+const GROUPS = [
+  {n:"Salud", d:"Qué tiene que cuidar el menú.", o:["colesterol","sal","equilibrado"]},
+  {n:"Tipo de alimentación", d:"De dónde sale la proteína.", o:["proteina","equilibrado","vegetariano"]},
+  {n:"Tiempo y bolsillo", d:"Cuánto quieres cocinar y gastar.", o:["rapido","pocococina","economico"]},
+];
+const W_BASE = {leg:4,pes:3,car:2,hue:2,ver:2,pas:1};
+function optsLabel(list){ return list.length ? list.map(k=>OPTS[k].n.toLowerCase()).join(" · ") : "variado"; }
+/* Une las opciones elegidas: los filtros se suman (todas a la vez) y el reparto de platos es la media */
+function combine(list){
+  const sel = list.filter(k=>OPTS[k]);
+  const ws = sel.map(k=>OPTS[k].w).filter(Boolean);
+  const w = {};
+  Object.keys(W_BASE).forEach(c=>{ w[c] = ws.length ? ws.reduce((a,x)=>a+(x[c]||0),0)/ws.length : W_BASE[c]; });
+  if (sel.includes("vegetariano")) { w.pes = 0; w.car = 0; }
+  return {
+    w,
+    okM:(k)=>sel.every(o=>!OPTS[o].okM || OPTS[o].okM(k)),
+    okD:(k)=>sel.every(o=>!OPTS[o].okD || OPTS[o].okD(k)),
+    azul: Math.max(0, ...sel.map(o=>OPTS[o].azul||0)),
+    batch: sel.some(o=>OPTS[o].batch),
+    cheap: sel.some(o=>OPTS[o].cheap),
+  };
+}
+function quotas(w, total){
+  const sum = Object.values(w).reduce((a,b)=>a+b,0) || 1;
+  const raw = Object.entries(w).map(([c,v])=>[c, v/sum*total]);
+  const q = Object.fromEntries(raw.map(([c,v])=>[c, Math.floor(v)]));
+  let left = total - Object.values(q).reduce((a,b)=>a+b,0);
+  raw.sort((a,b)=>(b[1]%1)-(a[1]%1)).forEach(([c])=>{ if (left>0 && w[c]>0){ q[c]++; left--; } });
+  return q;
+}
 
 function rng(seed){ let a = seed>>>0; return ()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
 function shuffle(arr, rnd){ for (let i=arr.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
 
-function buildMenu(key, seed, fueraFinde){
-  const P = PRESETS[key], rnd = rng(seed);
+function buildMenu(list, seed, fueraFinde){
+  const P = combine(list), rnd = rng(seed);
   const days = fueraFinde ? 5 : 7;
   const out = Array.from({length:7}, (_,i)=>({d:null,c:null,n:null}));
   const used = new Set();
@@ -999,10 +1083,8 @@ function buildMenu(key, seed, fueraFinde){
   for (let i=0;i<7;i++) out[i].d = {r: dl[i % dl.length]};
   /* Comidas y cenas: reparto de tipos de plato */
   let cats = [];
-  Object.entries(P.main).forEach(([c,n])=>{ for(let i=0;i<n;i++) cats.push(c); });
+  Object.entries(quotas(P.w, days*2)).forEach(([c,n])=>{ for(let i=0;i<n;i++) cats.push(c); });
   shuffle(cats, rnd);
-  while (cats.length < days*2) cats.push(Object.keys(P.main)[Math.floor(rnd()*Object.keys(P.main).length)]);
-  cats = cats.slice(0, days*2);
   const heavy = {leg:0,pas:1,car:2,pes:3,hue:4,ver:5};
   cats.sort((a,b)=>heavy[a]-heavy[b] + (rnd()-.5)*1.5);
   const lunch = shuffle(cats.slice(0,days), rnd), dinner = shuffle(cats.slice(days), rnd);
@@ -1046,7 +1128,7 @@ function weekSummary(){
 /* ---------- Estado ---------- */
 let have = new Set();
 let menu = clone(MENU_BASE);
-let personas = 1, preset = null, seed = 1, fueraFinde = false, pendingPreset = null;
+let personas = 1, opts = [], applied = null, seed = 1, fueraFinde = false, confirmOpts = false;
 let view = "ahora", filter = "all", override = null, confirmReset = false, confirmMenu = false, ideasAll = false;
 const LS = "micocina.despensa", LSM = "micocina.menu", LSP = "micocina.ajustes";
 try { const s = JSON.parse(localStorage.getItem(LS) || "null"); if (Array.isArray(s)) have = new Set(s.filter(k => ING[k])); } catch(e) {}
@@ -1054,7 +1136,10 @@ try { const m = cleanMenu(JSON.parse(localStorage.getItem(LSM) || "null")); if (
 try { const a = JSON.parse(localStorage.getItem(LSP) || "null"); if (a) applySettings(a); } catch(e) {}
 function applySettings(a){
   if (a && [1,2,3,4].includes(a.personas)) personas = a.personas;
-  if (a && (a.preset===null || PRESETS[a.preset])) preset = a.preset ?? null;
+  if (a && Array.isArray(a.opts)) opts = a.opts.filter(k=>OPTS[k]);
+  if (a && Array.isArray(a.applied)) applied = a.applied.filter(k=>OPTS[k]);
+  else if (a && a.preset && OPTS[a.preset]) { opts = [a.preset]; applied = [a.preset]; }
+  else if (a && a.preset === "pocococina") { opts = ["pocococina"]; applied = ["pocococina"]; }
   if (a && Number.isFinite(a.seed)) seed = a.seed;
   if (a && typeof a.fueraFinde === "boolean") fueraFinde = a.fueraFinde;
 }
@@ -1208,21 +1293,26 @@ function ideasBox(pool, exclude, fuera){
 
 /* ---------- Semana ---------- */
 function renderConfig(){
-  const sel = pendingPreset || preset;
-  const cards = Object.entries(PRESETS).map(([k,p])=>{
-    const tag = pendingPreset===k ? `<span class="ptag">Elegido · pulsa «Crear menú»</span>` : (!pendingPreset && preset===k ? `<span class="ptag">✓ Tu menú actual</span>` : "");
-    return `<button class="preset" data-preset="${k}" aria-pressed="${sel===k}"><span class="pe">${p.e}</span><b>${p.n}</b><small>${p.d}</small>${tag}</button>`;
-  }).join("");
-  const confirm = pendingPreset ? `<div class="confirm"><span>Se cambiará todo el menú de la semana por uno <b>${PRESETS[pendingPreset].n.toLowerCase()}</b>.</span><div class="quick"><button class="btn primary" id="presetYes">Crear menú</button><button class="btn" id="presetNo">Cancelar</button></div></div>` : "";
+  const same = applied && applied.length===opts.length && applied.every(k=>opts.includes(k));
+  const groups = GROUPS.map((g,gi)=>`<fieldset class="ogroup"><legend>${g.n}</legend><p class="legend" style="margin:0 0 8px">${g.d}</p>${g.o.map(k=>{
+      const o = OPTS[k], on = opts.includes(k);
+      return `<button type="button" class="opt" data-opt="${k}" aria-pressed="${on}"><span class="obox" aria-hidden="true">${on?"✓":""}</span><span class="oe" aria-hidden="true">${o.e}</span><span class="otx"><b>${o.n}</b><small>${o.d}</small></span></button>`;
+    }).join("")}</fieldset>`).join("");
+  const sel = opts.length ? opts.map(k=>`<span class="chip">${OPTS[k].e} ${OPTS[k].n}</span>`).join("") : `<span class="legend" style="margin:0">Ninguna: menú variado, de todo un poco.</span>`;
+  const warn = (opts.includes("vegetariano") && opts.includes("proteina")) ? `<p class="legend" style="margin:6px 0 0">Rico en proteína y vegetariano: la proteína saldrá de legumbres, tofu, soja y huevo.</p>` : "";
+  const action = confirmOpts
+    ? `<div class="confirm"><span>Se cambiará todo el menú de la semana por uno <b>${esc(optsLabel(opts))}</b>.</span><div class="quick"><button class="btn primary" id="optsYes">Crear menú</button><button class="btn" id="optsNo">Cancelar</button></div></div>`
+    : `<div class="quick" style="margin-top:12px"><button class="btn primary" id="optsAsk">${same ? "🔀 Otra combinación" : "Crear menú"}</button></div>`;
   $("cfgBox").innerHTML = `
     <div class="cfgrow"><h3>Personas</h3><div class="seg" role="group" aria-label="Número de personas">${[1,2,3,4].map(n=>`<button data-personas="${n}" aria-pressed="${personas===n}">${n}</button>`).join("")}</div></div>
     <p class="legend" style="margin:6px 0 14px">Las recetas y la lista de la compra se calculan para ${personas} ${personas===1?"persona":"personas"}.</p>
     <h3>Menú automático</h3>
-    <p class="legend" style="margin:4px 0 10px">Elige un estilo y te monto la semana entera. Después puedes cambiar cualquier plato.</p>
-    <div class="presets">${cards}</div>
+    <p class="legend" style="margin:4px 0 10px">Marca en cada sección las opciones que quieras, todas o ninguna. Se combinan y te monto la semana entera; después puedes cambiar cualquier plato.</p>
+    ${groups}
     <label class="check"><input type="checkbox" id="fueraFinde" ${fueraFinde?"checked":""}> El sábado y el domingo como y ceno fuera</label>
-    ${confirm}
-    ${preset && !pendingPreset ? `<div class="quick" style="margin-top:10px"><button class="btn" id="presetAgain">🔀 Otra combinación ${PRESETS[preset].n.toLowerCase()}</button></div>` : ""}
+    <div class="selbox"><span class="eyebrow">Tu selección</span><div class="chips">${sel}</div>${warn}</div>
+    ${action}
+    ${applied ? `<p class="legend" style="margin:8px 0 0">Menú actual: ${esc(optsLabel(applied))}.</p>` : ""}
     <div class="summary2"><span class="eyebrow">Tu semana ahora</span>${weekSummary()}</div>`;
 }
 function renderWeek(){
@@ -1308,6 +1398,8 @@ function renderRecipe(){
   $("panel").innerHTML = `<button class="close" id="rClose" aria-label="${backToPick?"Volver":"Cerrar receta"}">${backToPick?"‹":"✕"}</button>
     <div class="head">${plate(cur)}<h2 id="rTitle">${esc(r.n)}</h2><div class="meta"><span class="pill plain">⏱ ${r.t}</span><span class="pill plain">${esc(servingsLabel(cur))}</span></div></div>
     ${backToPick?`<div style="text-align:center;margin-top:10px"><button class="btn primary" data-pick="${cur}">Poner en el menú</button></div>`:""}
+    ${!colOk(cur) ? `<p class="warnbox">⚠️ No recomendado si tienes el colesterol alto. El menú bajo en colesterol no lo usa.</p>` : ""}
+    ${(opts.includes("sal") || (applied && applied.includes("sal"))) ? (salOk(cur) ? `<p class="tip">Bajo en sal: no añadas sal o pon solo una pizca; da sabor con ajo, especias, limón y hierbas.</p>` : `<p class="warnbox">🧂 Lleva ingredientes salados (latas, aceitunas o embutido).</p>`) : ""}
     <h3 style="margin-top:16px">Ingredientes</h3><ul class="ings">${ings}</ul>
     ${r.basic?`<p class="ings basic">Y de casa: ${esc(lower(r.basic))}.</p>`:""}
     ${note}
@@ -1340,7 +1432,9 @@ function renderPickList(){
   if (pickCat==="ok") list = list.filter(a=>!a.miss.length);
   else if (pickCat==="rap") list = list.filter(a=>minutes(a.k)<=20);
   else if (pickCat==="prot") list = list.filter(a=>has(a.k, pool==="d"?PROT_D:PROT_M));
-  else if (pickCat==="vegg") list = list.filter(a=>!has(a.k,[...MEAT,...FISH]));
+  else if (pickCat==="vegg") list = list.filter(a=>!has(a.k,[...MEAT,...FISH,"jamonYork"]));
+  else if (pickCat==="colok") list = list.filter(a=>colOk(a.k));
+  else if (pickCat==="bajosal") list = list.filter(a=>salOk(a.k));
   else if (pickCat!=="all") list = list.filter(a=>R[a.k].cat===pickCat);
   if (q) list = list.filter(a => norm(R[a.k].n).includes(q) || R[a.k].ing.some(([id])=>norm(ING[id].n).includes(q)));
   list.sort((a,b)=>a.miss.length-b.miss.length || R[a.k].n.localeCompare(R[b.k].n,"es"));
@@ -1348,7 +1442,7 @@ function renderPickList(){
   $("plist").innerHTML = list.length ? list.map(a=>{
     const r = R[a.k];
     const st = a.miss.length ? `<small class="no">Falta: ${esc(a.miss.map(x=>ING[x].n.toLowerCase()).join(", "))}</small>` : `<small>✓ Lo tienes todo</small>`;
-    return `<button class="prow${!slot.fuera&&slot.r===a.k&&!slot.sobras?" cur":""}" data-open-p="${a.k}">${plate(a.k)}<span><b>${esc(r.n)}</b><small>⏱ ${r.t} · ${esc(servingsLabel(a.k))}</small><br>${st}</span></button>`;
+    return `<button class="prow${!slot.fuera&&slot.r===a.k&&!slot.sobras?" cur":""}" data-open-p="${a.k}">${plate(a.k)}<span><b>${esc(r.n)}</b><small>⏱ ${r.t} · ${esc(servingsLabel(a.k))}${colOk(a.k)?"":" · ⚠️ no apto colesterol"}</small><br>${st}</span></button>`;
   }).join("") : `<p class="legend">No hay platos con ese filtro.</p>`;
 }
 function setSlot(val){
@@ -1371,7 +1465,7 @@ function persist(){
   clearTimeout(tHave);
   tHave = setTimeout(()=>queueWrite(dbDespensa, {tengo:[...have], actualizado:new Date().toISOString()}), 700);
 }
-function settings(){ return {personas, preset, seed, fueraFinde}; }
+function settings(){ return {personas, opts, applied, seed, fueraFinde}; }
 function saveMenu(){
   try { localStorage.setItem(LSM, JSON.stringify(menu)); localStorage.setItem(LSP, JSON.stringify(settings())); } catch(e) {}
   if (!dbMenu) return;
@@ -1500,7 +1594,7 @@ document.addEventListener("click", (e) => {
   if (t.dataset.slot) { const [i,m] = t.dataset.slot.split("-"); return openPicker(i, m); }
   if (t.dataset.toggle) return toggle(t.dataset.toggle);
   if (t.dataset.personas) { personas = +t.dataset.personas; saveMenu(); return renderAll(); }
-  if (t.dataset.preset) { pendingPreset = t.dataset.preset; renderConfig(); const c = document.querySelector(".confirm"); if (c) c.scrollIntoView({block:"nearest", behavior:"smooth"}); return; }
+  if (t.dataset.opt) { const k = t.dataset.opt; opts = opts.includes(k) ? opts.filter(x=>x!==k) : [...opts, k]; confirmOpts = false; saveMenu(); return renderConfig(); }
   if (t.dataset.cat) { pickCat = t.dataset.cat; document.querySelectorAll("#pCats button").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.cat===pickCat))); return renderPickList(); }
   if (t.dataset.f) { filter = t.dataset.f; return renderShop(); }
   if (t.dataset.m) { const ni = nowInfo(); override = {dayIdx: (override||ni).dayIdx, m: t.dataset.m}; return renderNow(); }
@@ -1516,12 +1610,12 @@ document.addEventListener("click", (e) => {
     case "pFuera": return setSlot({fuera:true});
     case "pSobras": { const prev = menu[(pick.i+6)%7][pick.m]; return setSlot({r:prev.r, sobras:true}); }
     case "pBase": return setSlot(clone(MENU_BASE[pick.i][pick.m]));
-    case "presetYes": preset = pendingPreset; pendingPreset = null; seed = Math.floor(Math.random()*1e9); menu = buildMenu(preset, seed, fueraFinde); saveMenu(); return renderAll();
-    case "presetNo": pendingPreset = null; return renderConfig();
-    case "presetAgain": seed = Math.floor(Math.random()*1e9); menu = buildMenu(preset, seed, fueraFinde); saveMenu(); return renderAll();
+    case "optsAsk": confirmOpts = true; renderConfig(); { const c = document.querySelector(".confirm"); if (c) c.scrollIntoView({block:"nearest", behavior:"smooth"}); } return;
+    case "optsNo": confirmOpts = false; return renderConfig();
+    case "optsYes": confirmOpts = false; applied = [...opts]; seed = Math.floor(Math.random()*1e9); menu = buildMenu(applied, seed, fueraFinde); saveMenu(); return renderAll();
     case "menuAsk": confirmMenu = true; return renderWeek();
     case "menuNo": confirmMenu = false; return renderWeek();
-    case "menuYes": confirmMenu = false; menu = clone(MENU_BASE); preset = null; saveMenu(); return renderAll();
+    case "menuYes": confirmMenu = false; menu = clone(MENU_BASE); applied = null; saveMenu(); return renderAll();
     case "resetAsk": confirmReset = true; return renderShop();
     case "resetNo": confirmReset = false; return renderShop();
     case "resetYes": confirmReset = false; have = new Set(); persist(); return renderAll();
@@ -1529,7 +1623,7 @@ document.addEventListener("click", (e) => {
   }
 });
 document.addEventListener("change", (e) => {
-  if (e.target.id==="fueraFinde"){ fueraFinde = e.target.checked; if (preset && !pendingPreset){ menu = buildMenu(preset, seed, fueraFinde); } saveMenu(); renderAll(); }
+  if (e.target.id==="fueraFinde"){ fueraFinde = e.target.checked; if (applied){ menu = buildMenu(applied, seed, fueraFinde); } saveMenu(); renderAll(); }
 });
 document.addEventListener("input", (e) => { if (e.target.id==="pSearch") { pickQ = e.target.value; renderPickList(); } });
 document.addEventListener("keydown", e => { if (e.key==="Escape" && mode) closeSheet(); });
