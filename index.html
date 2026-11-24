@@ -194,6 +194,18 @@ nav.tabs .badge{background:var(--miss);color:#fff;border-radius:999px;font-size:
 .check{display:flex;gap:8px;align-items:center;margin:12px 0 0;font-size:.88rem}
 .check input{width:18px;height:18px;accent-color:var(--accent)}
 .confirm{scroll-margin-bottom:110px;margin-top:12px;border:1px solid var(--accent);border-radius:var(--r);padding:10px 12px;display:grid;gap:8px;font-size:.9rem;background:var(--accent-soft)}
+.sug{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;gap:8px}
+.sugform{display:flex;gap:8px}
+.sugform .search{flex:1;min-width:0}
+.sugrow{display:flex;gap:10px;align-items:flex-start;border-top:1px solid var(--line);padding:8px 0 2px}
+.sugrow span{flex:1;min-width:0}
+.sugrow b{display:block;font-weight:600}
+.sugrow small{color:var(--muted);font-size:.78rem}
+.sugrow .estado{display:inline-block;border-radius:999px;padding:1px 8px;font-size:.72rem;font-weight:600;margin-top:2px;background:var(--bg);border:1px solid var(--line)}
+.sugrow .estado.ok{background:var(--accent-soft);border-color:transparent}
+.sugrow .estado.dup{background:var(--miss-soft);color:var(--miss);border-color:transparent}
+.sugrow .del{border:0;background:none;color:var(--muted);font-size:16px;padding:2px 6px}
+.sendlink{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--accent-ink);background:var(--accent);border-radius:999px;padding:8px 14px;font-weight:600;font-size:.85rem}
 .summary2{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;display:grid;gap:8px}
 </style>
 
@@ -243,6 +255,14 @@ nav.tabs .badge{background:var(--miss);color:#fff;border-radius:999px;font-size:
       <button id="f-have" data-f="have">En casa</button>
     </div>
     <div id="shopBox"></div>
+    <section class="sug" id="sugBox" aria-label="Sugerencias de alimentos">
+      <h3>Sugerencias de alimentos</h3>
+      <p class="legend" style="margin:0">Apunta alimentos que te gustaría comer. Cada jueves los reviso: quito los repetidos, añado los nuevos a la app con recetas y te dejo aquí lo que he hecho.</p>
+      <form id="sugForm" class="sugform"><input id="sugIn" class="search" type="text" placeholder="Ej.: coliflor, sardinas frescas…" maxlength="60" autocomplete="off" aria-label="Alimento que quieres sugerir"><button class="btn primary" type="submit">Añadir</button></form>
+      <div id="sugHint" class="legend" style="margin:0" aria-live="polite"></div>
+      <div id="sugList"></div>
+      <div id="sugSend"></div>
+    </section>
     <details class="more" id="moreBox"><summary>Otros alimentos <small>No están en tu menú. Márcalos si los tienes en casa y te sugeriré platos con ellos.</small></summary><div id="moreGrid"></div></details>
     <div class="staples"><b>Siempre en casa:</b> aceite de oliva (de la cooperativa), sal, ajo, pimentón, comino, laurel, orégano, perejil, canela y vinagre.</div>
     <div class="reset" id="resetBox"></div>
@@ -1288,9 +1308,11 @@ function toggle(id){
 (async () => {
   try {
     const db = window.claude?.use ? await window.claude.use("db") : null;
-    if (!db) { $("sync").textContent = localMsg; return; }
+    if (!db) { $("sync").textContent = localMsg; setTimeout(()=>{ renderSug(); loadRemoteSugs(); }); return; }
     dbDespensa = db.doc("casa/despensa");
     dbMenu = db.doc("casa/menu");
+    dbSug = db.collection("sugerencias");
+    dbSug.onSnapshot(snap => { sugs = snap.docs.map(d=>({id:d.id, ...d.data()})); renderSug(); }, () => {});
     dbDespensa.onSnapshot(snap => {
       if (snap.metadata.hasPendingWrites) return;
       if (snap.exists){ const t = snap.data().tengo; if (Array.isArray(t)) { have = new Set(t.filter(k=>ING[k])); try{localStorage.setItem(LS, JSON.stringify([...have]));}catch(e){} renderNow(); renderShop(); if (mode==="recipe") renderRecipe(); } }
@@ -1300,8 +1322,93 @@ function toggle(id){
       if (snap.metadata.hasPendingWrites) return;
       if (snap.exists){ const d = snap.data(); const m = cleanMenu(d.dias); if (m) { menu = m; applySettings(d); try{localStorage.setItem(LSM, JSON.stringify(menu)); localStorage.setItem(LSP, JSON.stringify(settings()));}catch(e){} renderAll(); } }
     }, () => {});
-  } catch(e) { $("sync").textContent = localMsg; }
+  } catch(e) { $("sync").textContent = localMsg; setTimeout(()=>{ renderSug(); loadRemoteSugs(); }); }
 })();
+
+
+/* ---------- Sugerencias de alimentos ----------
+   En Claude se guardan en la base de datos de la página (colección "sugerencias").
+   En la app del móvil se guardan en el teléfono y se envían como "issue" de GitHub.
+   Cada jueves Claude las revisa: estado pendiente → añadido | duplicado | descartado, con una nota. */
+const REPO = "Imberbe/mi-cocina";
+const LSS = "micocina.sugerencias";
+let sugs = [], dbSug = null, remoteSugs = [];
+try { const a = JSON.parse(localStorage.getItem(LSS) || "null"); if (Array.isArray(a)) sugs = a.filter(x=>x && typeof x.texto==="string"); } catch(e) {}
+const nrm = (s) => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").trim();
+const STOP = ["con","del","las","los","para","sin","una","uno","fresco","fresca","frescos","frescas"];
+function toks(s){
+  return nrm(s).split(/[^a-zñ0-9]+/).filter(w=>w.length>=3 && !STOP.includes(w))
+    .map(w=> /[lnrdzj]es$/.test(w) ? w.slice(0,-2) : (/s$/.test(w) ? w.slice(0,-1) : w));
+}
+function similar(text){
+  const t = toks(text); if (!t.length) return {ing:[], sg:[]};
+  const ing = Object.keys(ING).filter(id=>{ const it = toks(ING[id].n); return t.some(w=>it.includes(w)); });
+  const sg = sugs.filter(s=>{ const st = toks(s.texto); return t.some(w=>st.includes(w)); });
+  return {ing, sg};
+}
+function nextThursday(){
+  const d = new Date(); let add = (4 - d.getDay() + 7) % 7;
+  if (add===0 && d.getHours() >= 11) add = 7;
+  d.setDate(d.getDate()+add);
+  return add===0 ? "hoy jueves" : `el jueves ${d.toLocaleDateString("es-ES",{day:"numeric",month:"numeric"})}`;
+}
+function saveSugsLocal(){ try { localStorage.setItem(LSS, JSON.stringify(sugs)); } catch(e) {} }
+function sugState(s){
+  if (s.estado && s.estado!=="pendiente") return s;
+  const r = remoteSugs.find(x=>nrm(x.texto)===nrm(s.texto) && x.estado && x.estado!=="pendiente");
+  return r ? {...s, estado:r.estado, nota:r.nota} : s;
+}
+function renderSug(){
+  if (!$("sugList")) return;
+  const list = sugs.map(sugState).sort((a,b)=>String(b.fecha||"").localeCompare(String(a.fecha||"")));
+  const label = {pendiente:`Pendiente · se revisa ${nextThursday()}`, añadido:"Añadido", duplicado:"Ya estaba en la app", descartado:"Descartado"};
+  $("sugList").innerHTML = list.length ? list.map(s=>{
+    const st = s.estado || "pendiente";
+    const cls = st==="añadido" ? "ok" : (st==="duplicado"||st==="descartado") ? "dup" : "";
+    const extra = !dbSug && st==="pendiente" ? (s.enviado ? " · enviada" : " · sin enviar") : "";
+    return `<div class="sugrow"><span><b>${esc(s.texto)}</b><span class="estado ${cls}">${esc(label[st]||st)}${extra}</span>${s.nota?`<br><small>${esc(s.nota)}</small>`:""}</span>${st==="pendiente"?`<button class="del" data-sugdel="${esc(s.id)}" aria-label="Quitar ${esc(s.texto)}">✕</button>`:""}</div>`;
+  }).join("") : `<p class="legend" style="margin:0">Todavía no has sugerido nada.</p>`;
+  const unsent = dbSug ? [] : sugs.filter(s=>sugState(s).estado==="pendiente" && !s.enviado);
+  if (unsent.length){
+    const title = encodeURIComponent("Sugerencias de alimentos");
+    const body = encodeURIComponent("Alimentos sugeridos desde la app:\n\n" + unsent.map(s=>"- "+s.texto).join("\n"));
+    $("sugSend").innerHTML = `<p class="legend" style="margin:4px 0 8px">Para que me lleguen desde el móvil, envíalas por GitHub: se abre la página con la lista ya escrita y solo tienes que pulsar <b>Submit new issue</b>.</p><a class="sendlink" id="sugSendLink" href="https://github.com/${REPO}/issues/new?title=${title}&body=${body}" target="_blank" rel="noopener">Enviar ${unsent.length} ${unsent.length===1?"sugerencia":"sugerencias"}</a>`;
+  } else $("sugSend").innerHTML = "";
+}
+function sugHint(){
+  const v = $("sugIn").value.trim();
+  if (v.length < 3){ $("sugHint").textContent = ""; return; }
+  const {ing, sg} = similar(v); const parts = [];
+  if (ing.length) parts.push(`Ya hay en la app: ${ing.slice(0,3).map(i=>ING[i].n).join(", ")}. Si es otra cosa, añádelo igualmente.`);
+  if (sg.length) parts.push(`Ya lo has sugerido: ${sg.slice(0,2).map(s=>s.texto).join(", ")}.`);
+  $("sugHint").textContent = parts.join(" ");
+}
+async function addSug(text){
+  const t = text.trim().replace(/\s+/g," ");
+  if (t.length < 2) return;
+  if (sugs.some(s=>nrm(s.texto)===nrm(t) && sugState(s).estado==="pendiente")){ $("sugHint").textContent = "Ya está en tus sugerencias pendientes."; return; }
+  const {ing} = similar(t);
+  const doc = {texto:t, estado:"pendiente", fecha:new Date().toISOString(), parecido: ing.map(i=>ING[i].n)};
+  $("sugIn").value = ""; $("sugHint").textContent = "";
+  if (dbSug){
+    try { await dbSug.add(doc); } catch(e) { $("sugHint").textContent = "No se ha podido guardar. Prueba otra vez en un momento."; }
+  } else {
+    sugs.push({id:String(Date.now()), ...doc}); saveSugsLocal(); renderSug();
+  }
+}
+async function delSug(id){
+  if (dbSug){ try { await dbSug.doc(id).delete(); } catch(e) {} return; }
+  sugs = sugs.filter(s=>s.id!==id); saveSugsLocal(); renderSug();
+}
+async function loadRemoteSugs(){
+  try { const r = await fetch("sugerencias.json", {cache:"no-store"}); if (r.ok){ const j = await r.json(); if (Array.isArray(j)) { remoteSugs = j; renderSug(); } } } catch(e) {}
+}
+document.addEventListener("submit", (e) => { if (e.target.id==="sugForm"){ e.preventDefault(); addSug($("sugIn").value); } });
+document.addEventListener("input", (e) => { if (e.target.id==="sugIn") sugHint(); });
+document.addEventListener("click", (e) => {
+  const d = e.target.closest("[data-sugdel]"); if (d) { delSug(d.dataset.sugdel); return; }
+  if (e.target.closest("#sugSendLink")) { sugs.forEach(s=>{ if (sugState(s).estado==="pendiente") s.enviado = true; }); saveSugsLocal(); setTimeout(renderSug, 300); }
+});
 
 /* ---------- Eventos ---------- */
 document.addEventListener("click", (e) => {
@@ -1350,6 +1457,7 @@ document.addEventListener("keydown", e => { if (e.key==="Escape" && mode) closeS
 
 show("ahora");
 renderAll();
+renderSug();
 setInterval(()=>{ renderNow(); const ni = nowInfo(); $("clock").innerHTML = `${DAYS[ni.dayIdx]}<br>${ni.d.toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"})}`; }, 60000);
 </script>
 <script>if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}</script>
