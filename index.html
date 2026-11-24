@@ -189,10 +189,11 @@ nav.tabs .badge{background:var(--miss);color:#fff;border-radius:999px;font-size:
 .preset .pe{font-size:22px;line-height:1.2}
 .preset b{font-family:var(--f-display);font-size:.98rem}
 .preset small{color:var(--muted);font-size:.74rem;line-height:1.35}
-.preset[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.preset[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 1px var(--accent)}
+.ptag{margin-top:4px;font-size:.72rem;font-weight:700;color:var(--accent)}
 .check{display:flex;gap:8px;align-items:center;margin:12px 0 0;font-size:.88rem}
 .check input{width:18px;height:18px;accent-color:var(--accent)}
-.confirm{margin-top:12px;border:1px solid var(--accent);border-radius:var(--r);padding:10px 12px;display:grid;gap:8px;font-size:.9rem;background:var(--accent-soft)}
+.confirm{scroll-margin-bottom:110px;margin-top:12px;border:1px solid var(--accent);border-radius:var(--r);padding:10px 12px;display:grid;gap:8px;font-size:.9rem;background:var(--accent-soft)}
 .summary2{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;display:grid;gap:8px}
 </style>
 
@@ -1108,7 +1109,11 @@ function ideasBox(pool, exclude, fuera){
 
 /* ---------- Semana ---------- */
 function renderConfig(){
-  const cards = Object.entries(PRESETS).map(([k,p])=>`<button class="preset" data-preset="${k}" aria-pressed="${preset===k}"><span class="pe">${p.e}</span><b>${p.n}</b><small>${p.d}</small></button>`).join("");
+  const sel = pendingPreset || preset;
+  const cards = Object.entries(PRESETS).map(([k,p])=>{
+    const tag = pendingPreset===k ? `<span class="ptag">Elegido · pulsa «Crear menú»</span>` : (!pendingPreset && preset===k ? `<span class="ptag">✓ Tu menú actual</span>` : "");
+    return `<button class="preset" data-preset="${k}" aria-pressed="${sel===k}"><span class="pe">${p.e}</span><b>${p.n}</b><small>${p.d}</small>${tag}</button>`;
+  }).join("");
   const confirm = pendingPreset ? `<div class="confirm"><span>Se cambiará todo el menú de la semana por uno <b>${PRESETS[pendingPreset].n.toLowerCase()}</b>.</span><div class="quick"><button class="btn primary" id="presetYes">Crear menú</button><button class="btn" id="presetNo">Cancelar</button></div></div>` : "";
   $("cfgBox").innerHTML = `
     <div class="cfgrow"><h3>Personas</h3><div class="seg" role="group" aria-label="Número de personas">${[1,2,3,4].map(n=>`<button data-personas="${n}" aria-pressed="${personas===n}">${n}</button>`).join("")}</div></div>
