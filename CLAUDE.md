@@ -27,7 +27,7 @@ Pensada para bajar el colesterol y con poco presupuesto. Todo en español de Esp
 ## Reglas para recetas nuevas
 
 - **No se descarta ningún alimento por salud** (decisión de Alejandro): todo lo que se sugiera entra con recetas, para tener platos de todo tipo. Lo que no conviene con el colesterol alto (embutido, nata, mantequilla, queso curado, carne roja, fritos…) se marca `col:false`, y si el alimento lo permite se hace también una versión sana.
-- Por defecto, recetas buenas para el colesterol: aceite de oliva con medida.
+- Las recetas no tienen que ser bajas en colesterol (dicho por Alejandro): platos de todo tipo, también lasaña, carbonara, croquetas, fritos… Las que no convengan se marcan `col:false` (o lo hacen sus alimentos) y el menú «Bajo en colesterol» ya las excluye. Aceite de oliva con medida.
 - Baratas, con ingredientes de supermercado español. Sin alcachofa (no le gusta). La pasta le encanta.
 - Pasos cortos y concretos (3–6), con tiempos y temperaturas. Cantidades en `ing` con número delante para que se puedan escalar.
 
