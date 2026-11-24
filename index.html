@@ -124,10 +124,11 @@ button:focus-visible,.tile:focus-visible{outline:2px solid var(--accent);outline
 
 /* Pestañas */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);padding:6px max(16px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
-nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
 nav.tabs button{border:0;background:none;border-radius:12px;padding:6px 4px;display:grid;justify-items:center;gap:1px;font-size:.75rem;color:var(--muted);font-weight:600}
 nav.tabs button .i{font-size:20px;line-height:24px}
 nav.tabs button[aria-selected="true"]{color:var(--ink);background:var(--accent-soft)}
+nav.tabs .badge.ok{background:var(--accent);color:var(--accent-ink)}
 nav.tabs .badge{background:var(--miss);color:#fff;border-radius:999px;font-size:.65rem;padding:0 6px;margin-left:3px;font-variant-numeric:tabular-nums}
 
 /* Receta */
@@ -233,6 +234,34 @@ nav.tabs .badge{background:var(--miss);color:#fff;border-radius:999px;font-size:
 .wzrow:first-child{border-top:0}
 .wzrow span{color:var(--muted);flex:none}
 .wzrow b{text-align:right;min-width:0}
+.cksec{margin-top:18px}
+.cksec > h3{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.cksec > h3 small{font-family:var(--f-body);font-weight:500;color:var(--muted);font-size:.8rem}
+.cklist{display:grid;gap:8px;margin-top:8px}
+.ck{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:8px;display:grid;gap:6px}
+.ckmain{display:flex;gap:10px;align-items:center;border:0;background:none;padding:0;text-align:left;width:100%}
+.ckmain svg{width:64px;height:64px;flex:none}
+.ckmain span{min-width:0;display:grid;gap:2px}
+.ckmain b{font-weight:600;line-height:1.25}
+.ckmain small{color:var(--muted);font-size:.76rem;line-height:1.3}
+.ckmain .use{color:var(--accent);font-weight:600}
+.ckmain .no{color:var(--miss);font-weight:600}
+.ckact{display:flex;gap:6px;padding-left:74px}
+.ckact .btn{padding:5px 10px;font-size:.78rem}
+.ckfilters{display:grid;gap:8px;margin:10px 0 4px}
+.fchips button.tog[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+details.ckmore > summary{cursor:pointer;font-family:var(--f-display);font-weight:700;padding:6px 0}
+.placegrid{display:grid;gap:6px}
+.placerow{display:grid;grid-template-columns:88px 1fr;gap:8px;align-items:center;border-top:1px solid var(--line);padding-top:6px}
+.placerow > b{font-size:.9rem}
+.placerow .pbtns{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px}
+.placerow button{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:6px 8px;text-align:left;font-size:.78rem;display:grid;gap:1px;min-width:0}
+.placerow button small{color:var(--muted);font-size:.7rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.placerow button:hover{border-color:var(--accent)}
+.shoptools{display:grid;gap:8px;margin:4px 0 12px}
+.shoptools .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.extrabox{margin-top:16px;border:1px dashed var(--accent);border-radius:var(--r);padding:4px 12px 12px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(74px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:.85rem;font-weight:600;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(0,0,0,.2)}
 .summary2{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;display:grid;gap:8px}
 </style>
 
@@ -269,6 +298,21 @@ nav.tabs .badge{background:var(--miss);color:#fff;border-radius:999px;font-size:
     <div class="reset" id="menuResetBox"></div>
   </section>
 
+  <section class="view" id="v-cocina" aria-label="Con lo que tengo" hidden>
+    <h2>Con lo que tengo</h2>
+    <p class="legend" id="ckIntro" style="margin-top:4px"></p>
+    <div class="ckfilters">
+      <div class="seg" role="group" aria-label="Qué comida">
+        <button id="ckp-all" data-ckpool="all">Todo</button>
+        <button id="ckp-d" data-ckpool="d">Desayunos</button>
+        <button id="ckp-m" data-ckpool="m">Comidas y cenas</button>
+      </div>
+      <div class="fchips" id="ckToggles"></div>
+      <div class="fchips" id="ckCats"></div>
+    </div>
+    <div id="ckBox"></div>
+  </section>
+
   <section class="view" id="v-compra" aria-label="Lista de la compra" hidden>
     <h2>Lista de la compra</h2>
     <div class="summary">
@@ -281,7 +325,13 @@ nav.tabs .badge{background:var(--miss);color:#fff;border-radius:999px;font-size:
       <button id="f-buy" data-f="buy">Por comprar</button>
       <button id="f-have" data-f="have">En casa</button>
     </div>
+    <div class="shoptools">
+      <input class="search" id="shopQ" type="search" placeholder="Buscar un alimento para marcarlo…" autocomplete="off" aria-label="Buscar alimento">
+      <div class="row"><button class="btn" id="basicsBtn">✓ Marcar lo de siempre</button><small class="legend" style="margin:0">Arroz, pasta, cebolla, patata, huevos, tomate triturado, lentejas, garbanzos, avena, leche y pan.</small></div>
+    </div>
+    <div id="shopSearch"></div>
     <div id="shopBox"></div>
+    <div id="extraBox"></div>
     <section class="sug" id="sugBox" aria-label="Sugerencias de alimentos">
       <h3>Sugerencias de alimentos</h3>
       <p class="legend" style="margin:0">Apunta alimentos que te gustaría comer. Cada jueves los reviso: quito los repetidos, añado los nuevos a la app con recetas y te dejo aquí lo que he hecho.</p>
@@ -301,10 +351,12 @@ nav.tabs .badge{background:var(--miss);color:#fff;border-radius:999px;font-size:
   <div class="in" role="tablist">
     <button role="tab" id="t-ahora" data-v="ahora"><span class="i">🍽️</span>Ahora</button>
     <button role="tab" id="t-semana" data-v="semana"><span class="i">🗓️</span>Semana</button>
+    <button role="tab" id="t-cocina" data-v="cocina"><span class="i">🧺</span><span>Lo que tengo<span class="badge ok" id="ckBadge"></span></span></button>
     <button role="tab" id="t-compra" data-v="compra"><span class="i">🛒</span><span>Compra<span class="badge" id="tabBadge"></span></span></button>
   </div>
 </nav>
 
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <div class="sheet" id="sheet" hidden>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="rTitle" id="panel"></div>
 </div>
@@ -1456,24 +1508,14 @@ function ideaCard(a){
   return `<button class="idea${a.miss.length?" near":""}" data-open="${a.k}">${plate(a.k)}<b>${esc(r.n)}</b><small>${esc(note)}</small></button>`;
 }
 function ideasBox(pool, exclude, fuera){
-  const all = Object.keys(R).filter(k=>R[k].pool===pool && !exclude.includes(k)).map(k=>({k, miss:missingRecipe(k)}));
-  const can = all.filter(a=>!a.miss.length);
-  const near = all.filter(a=>a.miss.length===1);
-  const one = pool==="d" ? "desayuno" : "plato", many = pool==="d" ? "desayunos" : "platos";
-  const LIM = 6;
+  const all = rankDishes(Object.keys(R).filter(k=>R[k].pool===pool && !exclude.includes(k)));
+  const can = all.filter(a=>!a.miss.length), near = all.filter(a=>a.miss.length===1);
+  const total = Object.keys(R).filter(k=>!missingRecipe(k).length).length;
+  const list = (can.length ? can : near).slice(0,3);
   let h = `<section class="ideas"><h3>${fuera?"Si comes en casa, puedes hacer":"¿Te apetece otra cosa?"}</h3>`;
-  if (can.length){
-    const list = ideasAll ? can : can.slice(0, LIM);
-    h += `<p class="legend">Con lo que tienes en casa puedes hacer ${can.length} ${can.length===1?one:many}:</p><div class="igrid">${list.map(ideaCard).join("")}</div>`;
-    if (can.length > LIM) h += `<button class="btn showall" id="ideasMore">${ideasAll?"Ver menos":`Ver los ${can.length}`}</button>`;
-  } else {
-    h += `<p class="legend">Con lo que tienes marcado no sale ningún otro ${one} completo.</p>`;
-  }
-  if (near.length){
-    const list = ideasAll ? near : near.slice(0, LIM);
-    h += `<h3 style="margin-top:16px;font-size:.95rem">Te falta solo 1 cosa (${near.length})</h3><div class="igrid">${list.map(ideaCard).join("")}</div>`;
-    if (near.length > LIM && !(can.length > LIM)) h += `<button class="btn showall" id="ideasMore">${ideasAll?"Ver menos":`Ver los ${near.length}`}</button>`;
-  }
+  h += list.length ? `<p class="legend">${can.length ? "Con lo que tienes en casa:" : "Te falta solo una cosa para:"}</p><div class="igrid">${list.map(ideaCard).join("")}</div>`
+                   : `<p class="legend">Marca en Compra lo que tienes en casa y te diré qué puedes cocinar.</p>`;
+  h += `<button class="btn showall" data-v="cocina">🧺 Ver todo lo que puedes cocinar${total?` (${total})`:""}</button>`;
   return h + `</section>`;
 }
 
@@ -1571,11 +1613,15 @@ function renderShop(){
   const needs = menuNeeds();
   const need = Object.keys(needs);
   const buy = need.filter(i=>!have.has(i));
-  $("nBuy").textContent = buy.length;
-  $("eBuy").textContent = `por comprar para tu menú (${personas} ${personas===1?"persona":"personas"}) · unos ${eur(buy.reduce((s,i)=>s+ING[i].p*needs[i],0))}`;
+  const extraBuy = [...extra].filter(i=>!have.has(i) && !needs[i]);
+  $("nBuy").textContent = buy.length + extraBuy.length;
+  $("eBuy").textContent = `por comprar (${personas} ${personas===1?"persona":"personas"}${extraBuy.length?`, ${extraBuy.length} apuntados aparte`:""}) · unos ${eur(buy.reduce((s,i)=>s+ING[i].p*needs[i],0) + extraBuy.reduce((s,i)=>s+ING[i].p,0))}`;
+  $("extraBox").innerHTML = extraBuy.length ? `<div class="extrabox"><h3 class="sec" style="display:flex;justify-content:space-between;align-items:center">Apuntado para platos sueltos <button class="linkbtn" id="extraClear">Quitar todo</button></h3><div class="grid">${extraBuy.map(i=>tile(i)).join("")}</div></div>` : "";
+  { const q = nrm($("shopQ").value || ""); 
+    $("shopSearch").innerHTML = q.length>=2 ? (()=>{ const m = Object.keys(ING).filter(i=>nrm(ING[i].n).includes(q)); return m.length ? `<h3 class="sec">Resultados</h3><div class="grid">${m.map(i=>tile(i, needs[i])).join("")}</div>` : `<p class="legend">No hay ningún alimento con «${esc($("shopQ").value)}». Puedes sugerirlo abajo.</p>`; })() : ""; }
   $("nHave").textContent = have.size;
-  $("tabBadge").textContent = buy.length || "";
-  $("tabBadge").hidden = !buy.length;
+  $("tabBadge").textContent = (buy.length + extraBuy.length) || "";
+  $("tabBadge").hidden = !(buy.length + extraBuy.length);
   ["all","buy","have"].forEach(k=>$("f-"+k).setAttribute("aria-pressed", String(filter===k)));
   const shown = need.filter(i => filter==="all" || (filter==="buy" ? !have.has(i) : have.has(i)));
   $("shopBox").innerHTML = shown.length ? groupBySec(shown, needs)
@@ -1588,20 +1634,102 @@ function renderShop(){
 }
 
 function renderAll(){
-  renderNow(); renderWeek(); renderShop();
+  renderNow(); renderWeek(); renderShop(); renderCocina();
   const ni = nowInfo();
   $("clock").innerHTML = `${DAYS[ni.dayIdx]}<br>${ni.d.toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"})}`;
 }
 function show(v){
   view = v;
-  ["ahora","semana","compra"].forEach(k=>{ $("v-"+k).hidden = k!==v; $("t-"+k).setAttribute("aria-selected", String(k===v)); });
+  ["ahora","semana","cocina","compra"].forEach(k=>{ $("v-"+k).hidden = k!==v; $("t-"+k).setAttribute("aria-selected", String(k===v)); });
   window.scrollTo(0,0);
 }
+
+
+/* ---------- Con lo que tengo: todo lo que puedes cocinar con lo marcado ---------- */
+/* Lo que antes se estropea, con su peso: primero pescado y carne fresca, luego hoja y lácteos frescos */
+const PERISH = {sardinasFrescas:3, pollo:3, pavo:3, lomo:3, corzo:3, jabali:3, espinacas:2, lechuga:2, champis:2, aguacate:2, esparragos:2,
+  quesoBurgos:2, quesoTierno:2, hummus:2, jamonYork:2, tomate:1, pepino:1, calabacin:1, brocoli:1, berenjena:1, pimiento:1, yogur:1, quesoBatido:1, platano:1, kiwi:1, coliflor:1};
+const BASICS = ["arroz","pasta","cebolla","patata","huevos","tomateTri","lentejas","garbanzos","avena","leche","pan"];
+let ck = {pool:"all", col:false, rap:false, veg:false, cat:"all"}, ckOpen = {can:false, one:false};
+let extra = new Set();
+try { const e = JSON.parse(localStorage.getItem("micocina.extra") || "null"); if (Array.isArray(e)) extra = new Set(e.filter(k=>ING[k])); } catch(e) {}
+function rankDishes(keys){
+  return keys.map(k=>{
+    const miss = missingRecipe(k);
+    const use = R[k].ing.map(x=>x[0]).filter(id=>have.has(id) && PERISH[id]).sort((a,b)=>PERISH[b]-PERISH[a]);
+    const score = use.reduce((s,id)=>s+PERISH[id],0);
+    return {k, miss, use, score};
+  }).sort((a,b)=>a.miss.length-b.miss.length || b.score-a.score || minutes(a.k)-minutes(b.k));
+}
+function ckFilterKeys(){
+  return Object.keys(R).filter(k=>{
+    const r = R[k];
+    if (ck.pool!=="all" && r.pool!==ck.pool) return false;
+    if (ck.col && !colOk(k)) return false;
+    if (ck.rap && minutes(k) > (r.pool==="d"?10:20)) return false;
+    if (ck.veg && has(k,[...MEAT,...FISH,"jamonYork"])) return false;
+    if (ck.cat!=="all" && r.cat!==ck.cat) return false;
+    return true;
+  });
+}
+function ckCard(a){
+  const r = R[a.k];
+  const bits = [`⏱ ${r.t}`, servingsLabel(a.k)];
+  if (!colOk(a.k)) bits.push("⚠️ no apto colesterol");
+  return `<div class="ck"><button class="ckmain" data-open="${a.k}">${plate(a.k)}<span><b>${esc(r.n)}</b><small>${esc(bits.join(" · "))}</small>
+      ${a.use.length?`<small class="use">Aprovecha: ${esc(a.use.slice(0,3).map(i=>ING[i].n.toLowerCase()).join(", "))}</small>`:""}
+      ${a.miss.length?`<small class="no">Falta: ${esc(a.miss.map(i=>ING[i].n.toLowerCase()).join(", "))}</small>`:""}</span></button>
+    <div class="ckact"><button class="btn" data-place="${a.k}">📅 Al menú</button>${a.miss.length?`<button class="btn" data-addmiss="${a.k}">🛒 Apuntar lo que falta</button>`:""}</div></div>`;
+}
+function renderCocina(){
+  const allCan = Object.keys(R).filter(k=>!missingRecipe(k).length).length;
+  $("ckBadge").textContent = allCan || ""; $("ckBadge").hidden = !allCan;
+  ["all","d","m"].forEach(k=>$("ckp-"+k).setAttribute("aria-pressed", String(ck.pool===k)));
+  $("ckToggles").innerHTML = [["col","💚 Aptos para el colesterol"],["rap","⏱️ Rápidos"],["veg","🥕 Vegetarianos"]]
+    .map(([k,l])=>`<button class="tog" data-cktog="${k}" aria-pressed="${ck[k]}">${l}</button>`).join("");
+  const cats = ck.pool==="d" ? [["dulce","Dulces"],["salado","Salados"]] : ck.pool==="m" ? CATS.m.filter(([k])=>["leg","pes","car","hue","ver","pas"].includes(k)) : [["dulce","Desayunos dulces"],["salado","Desayunos salados"],...CATS.m.filter(([k])=>["leg","pes","car","hue","ver","pas"].includes(k))];
+  if (ck.cat!=="all" && !cats.some(([k])=>k===ck.cat)) ck.cat = "all";
+  $("ckCats").innerHTML = [["all","Cualquier tipo"],...cats].map(([k,l])=>`<button data-ckcat="${k}" aria-pressed="${ck.cat===k}">${l}</button>`).join("");
+  const list = rankDishes(ckFilterKeys());
+  const can = list.filter(a=>!a.miss.length), one = list.filter(a=>a.miss.length===1), two = list.filter(a=>a.miss.length===2);
+  $("ckIntro").textContent = have.size
+    ? `Con los ${have.size} alimentos que tienes marcados en casa. Primero van los platos que aprovechan lo que antes se estropea.`
+    : "Todavía no has marcado nada en casa. Ve a Compra y marca lo que tienes (el botón «Marcar lo de siempre» lo hace rápido).";
+  const LIM = 12;
+  const sec = (key, title, arr, empty) => {
+    const open = ckOpen[key], show = open ? arr : arr.slice(0, LIM);
+    return `<section class="cksec"><h3>${title} <small>${arr.length} ${arr.length===1?"plato":"platos"}</small></h3>
+      ${arr.length ? `<div class="cklist">${show.map(ckCard).join("")}</div>${arr.length>LIM?`<button class="btn showall" data-ckmore="${key}">${open?"Ver menos":`Ver los ${arr.length}`}</button>`:""}` : `<p class="legend">${empty}</p>`}</section>`;
+  };
+  $("ckBox").innerHTML =
+    sec("can", "✓ Lo tienes todo", can, "Con estos filtros no sale ningún plato completo con lo que tienes.") +
+    sec("one", "Te falta 1 cosa", one, "Ninguno.") +
+    (two.length ? `<details class="ckmore cksec"><summary>Te faltan 2 cosas (${two.length})</summary><div class="cklist">${two.slice(0,30).map(ckCard).join("")}</div></details>` : "");
+}
+
+/* Poner un plato en el menú: elegir día y comida */
+let placeKey = null;
+function openPlace(k){ placeKey = k; mode = "place"; openSheet(); renderPlace(); }
+function renderPlace(){
+  const r = R[placeKey]; const meals = r.pool==="d" ? ["d"] : ["c","n"]; const today = nowInfo().dayIdx;
+  const rows = DAYS.map((d,i)=>`<div class="placerow"><b>${d}${i===today?" · hoy":""}</b><div class="pbtns">${meals.map(m=>{
+      const s = menu[i][m]; const now = s.fuera ? "Fuera" : R[s.r].n + (s.sobras?" (sobras)":"");
+      return `<button data-placeat="${i}-${m}"><b>${MEALS[m]}</b><small>Ahora: ${esc(now)}</small></button>`;
+    }).join("")}</div></div>`).join("");
+  $("panel").innerHTML = `<button class="close" id="rClose" aria-label="Cerrar">✕</button>
+    <div class="ptop"><div class="eyebrow">Poner en el menú</div><h2 id="rTitle">${esc(r.n)}</h2>
+    <p class="legend" style="margin:0">Elige cuándo lo vas a comer. Sustituye al plato que hubiera.</p>
+    <div class="placegrid">${rows}</div></div>`;
+}
+let toastT = null;
+function toast(msg){ const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(()=>{ t.hidden = true; }, 2600); }
+function saveExtra(){ try { localStorage.setItem("micocina.extra", JSON.stringify([...extra])); } catch(e) {} persist(); }
 
 /* ---------- Hoja: receta y selector de plato ---------- */
 let mode = null, cur = null, stepI = 0, showAll = false, pick = null, pickCat = "all", pickQ = "", backToPick = false;
 function openSheet(){ $("sheet").hidden = false; document.body.style.overflow="hidden"; $("panel").scrollTop = 0; }
 function closeSheet(){
+  if (mode==="place"){ placeKey = null; $("sheet").hidden = true; mode = null; document.body.style.overflow=""; return; }
   if (mode==="wiz"){ wz = null; $("sheet").hidden = true; mode = null; document.body.style.overflow=""; return; }
   if (mode==="recipe" && backToPick && pick){ backToPick = false; mode = "pick"; renderPicker(); return; }
   $("sheet").hidden = true; mode = null; cur = null; pick = null; backToPick = false; document.body.style.overflow="";
@@ -1686,7 +1814,7 @@ function persist(){
   try { localStorage.setItem(LS, JSON.stringify([...have])); } catch(e) {}
   if (!dbDespensa) return;
   clearTimeout(tHave);
-  tHave = setTimeout(()=>queueWrite(dbDespensa, {tengo:[...have], actualizado:new Date().toISOString()}), 700);
+  tHave = setTimeout(()=>queueWrite(dbDespensa, {tengo:[...have], extra:[...extra], actualizado:new Date().toISOString()}), 700);
 }
 function settings(){ return {personas, opts, applied, seed, fueraFinde}; }
 function saveMenu(){
@@ -1696,8 +1824,8 @@ function saveMenu(){
   tMenu = setTimeout(()=>queueWrite(dbMenu, {dias:clone(menu), ...settings(), actualizado:new Date().toISOString()}), 400);
 }
 function toggle(id){
-  if (have.has(id)) have.delete(id); else have.add(id);
-  persist(); renderNow(); renderShop();
+  if (have.has(id)) have.delete(id); else { have.add(id); if (extra.delete(id)) { try { localStorage.setItem("micocina.extra", JSON.stringify([...extra])); } catch(e) {} } }
+  persist(); renderNow(); renderShop(); renderCocina();
   if (mode==="recipe") renderRecipe(); else if (mode==="pick") renderPickList();
 }
 
@@ -1711,7 +1839,7 @@ function toggle(id){
     dbSug.onSnapshot(snap => { sugs = snap.docs.map(d=>({id:d.id, ...d.data()})); renderSug(); }, () => {});
     dbDespensa.onSnapshot(snap => {
       if (snap.metadata.hasPendingWrites) return;
-      if (snap.exists){ const t = snap.data().tengo; if (Array.isArray(t)) { have = new Set(t.filter(k=>ING[k])); try{localStorage.setItem(LS, JSON.stringify([...have]));}catch(e){} renderNow(); renderShop(); if (mode==="recipe") renderRecipe(); } }
+      if (snap.exists){ const dd = snap.data(); const t = dd.tengo; if (Array.isArray(dd.extra)) extra = new Set(dd.extra.filter(k=>ING[k])); if (Array.isArray(t)) { have = new Set(t.filter(k=>ING[k])); try{localStorage.setItem(LS, JSON.stringify([...have]));}catch(e){} renderNow(); renderShop(); renderCocina(); if (mode==="recipe") renderRecipe(); } }
       $("sync").textContent = okMsg;
     }, () => { $("sync").textContent = localMsg; });
     dbMenu.onSnapshot(snap => {
@@ -1810,7 +1938,14 @@ document.addEventListener("click", (e) => {
 document.addEventListener("click", (e) => {
   const t = e.target.closest("button");
   if (!t) { if (e.target.id==="sheet") closeSheet(); return; }
-  if (t.dataset.v) return show(t.dataset.v);
+  if (t.dataset.v) { if (mode) closeSheet(); return show(t.dataset.v); }
+  if (t.dataset.place) return openPlace(t.dataset.place);
+  if (t.dataset.placeat && placeKey) { const [i,m] = t.dataset.placeat.split("-"); const k = placeKey; menu[+i][m] = {r:k}; saveMenu(); placeKey = null; $("sheet").hidden = true; mode = null; document.body.style.overflow=""; renderAll(); return toast(`${R[k].n}: ${DAYS[+i].toLowerCase()}, ${MEALS[m].toLowerCase()}`); }
+  if (t.dataset.addmiss) { const miss = missingRecipe(t.dataset.addmiss); miss.forEach(i=>extra.add(i)); saveExtra(); renderShop(); return toast(`Apuntado en la compra: ${miss.map(i=>ING[i].n.toLowerCase()).join(", ")}`); }
+  if (t.dataset.ckpool) { ck.pool = t.dataset.ckpool; return renderCocina(); }
+  if (t.dataset.cktog) { ck[t.dataset.cktog] = !ck[t.dataset.cktog]; return renderCocina(); }
+  if (t.dataset.ckcat) { ck.cat = t.dataset.ckcat; return renderCocina(); }
+  if (t.dataset.ckmore) { ckOpen[t.dataset.ckmore] = !ckOpen[t.dataset.ckmore]; return renderCocina(); }
   if (t.dataset.open) return openRecipe(t.dataset.open, false);
   if (t.dataset.openP) return openRecipe(t.dataset.openP, true);
   if (t.dataset.pick) return setSlot({r:t.dataset.pick});
@@ -1826,6 +1961,8 @@ document.addEventListener("click", (e) => {
     case "dayPrev": case "dayNext": { const ni = nowInfo(); const o = override || {dayIdx:ni.dayIdx,m:ni.m}; override = {m:o.m, dayIdx:(o.dayIdx+(t.id==="dayNext"?1:6))%7}; return renderNow(); }
     case "backNow": override = null; return renderNow();
     case "ideasMore": ideasAll = !ideasAll; return renderNow();
+    case "basicsBtn": { const add = BASICS.filter(i=>!have.has(i)); add.forEach(i=>{ have.add(i); extra.delete(i); }); persist(); renderAll(); return toast(add.length ? `Marcados ${add.length} básicos como en casa` : "Ya tenías marcados todos los básicos"); }
+    case "extraClear": extra = new Set(); saveExtra(); return renderShop();
     case "rClose": return closeSheet();
     case "stPrev": stepI = Math.max(0, stepI-1); return renderRecipe();
     case "stNext": stepI = Math.min(R[cur].steps.length-1, stepI+1); return renderRecipe();
@@ -1852,7 +1989,7 @@ document.addEventListener("change", (e) => {
   if (e.target.id==="wFuera" && wz){ wz.fuera = e.target.checked; return; }
   if (e.target.id==="fueraFinde"){ fueraFinde = e.target.checked; if (applied){ menu = buildMenu(applied, seed, fueraFinde); } saveMenu(); renderAll(); }
 });
-document.addEventListener("input", (e) => { if (e.target.id==="pSearch") { pickQ = e.target.value; renderPickList(); } });
+document.addEventListener("input", (e) => { if (e.target.id==="pSearch") { pickQ = e.target.value; renderPickList(); } if (e.target.id==="shopQ") renderShop(); });
 document.addEventListener("keydown", e => { if (e.key==="Escape" && mode) closeSheet(); });
 
 show("ahora");
