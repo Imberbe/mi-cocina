@@ -195,7 +195,15 @@ nav.tabs .badge{background:var(--miss);color:#fff;border-radius:999px;font-size:
 .check{display:flex;gap:8px;align-items:center;margin:12px 0 0;font-size:.88rem}
 .check input{width:18px;height:18px;accent-color:var(--accent)}
 .confirm{scroll-margin-bottom:110px;margin-top:12px;border:1px solid var(--accent);border-radius:var(--r);padding:10px 12px;display:grid;gap:8px;font-size:.9rem;background:var(--accent-soft)}
-.sug{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;gap:8px}
+.sug{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:12px 14px}
+.sug > summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px;font-family:var(--f-display);font-weight:700}
+.sug > summary::-webkit-details-marker{display:none}
+.sug > summary::after{content:"▾";color:var(--muted);font-size:.9rem}
+.sug[open] > summary::after{content:"▴"}
+.sug > summary > span:first-child{flex:1}
+.sugcount{font-family:var(--f-body);font-size:.75rem;font-weight:600;color:var(--muted)}
+.sugcount.new{background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:2px 8px}
+.sugbody{display:grid;gap:8px;margin-top:10px}
 .sugform{display:flex;gap:8px}
 .sugform .search{flex:1;min-width:0}
 .sugrow{display:flex;gap:10px;align-items:flex-start;border-top:1px solid var(--line);padding:8px 0 2px}
@@ -332,17 +340,19 @@ details.ckmore > summary{cursor:pointer;font-family:var(--f-display);font-weight
     <div id="shopSearch"></div>
     <div id="shopBox"></div>
     <div id="extraBox"></div>
-    <section class="sug" id="sugBox" aria-label="Sugerencias de alimentos">
-      <h3>Sugerencias de alimentos</h3>
+    <details class="more" id="moreBox"><summary>Otros alimentos <small>No están en tu menú. Márcalos si los tienes en casa y te sugeriré platos con ellos.</small></summary><div id="moreGrid"></div></details>
+    <div class="staples"><b>Siempre en casa:</b> aceite de oliva (de la cooperativa), sal, ajo, pimentón, comino, laurel, orégano, perejil, canela y vinagre.</div>
+    <div class="reset" id="resetBox"></div>
+    <details class="sug" id="sugBox" aria-label="Sugerencias de alimentos">
+      <summary><span>💡 Sugerir un alimento</span><span class="sugcount" id="sugCount"></span></summary>
+      <div class="sugbody">
       <p class="legend" style="margin:0">Apunta alimentos que te gustaría comer. Cada jueves los reviso: quito los repetidos, añado los nuevos a la app con recetas y te dejo aquí lo que he hecho.</p>
       <form id="sugForm" class="sugform"><input id="sugIn" class="search" type="text" placeholder="Ej.: coliflor, sardinas frescas…" maxlength="60" autocomplete="off" aria-label="Alimento que quieres sugerir"><button class="btn primary" type="submit">Añadir</button></form>
       <div id="sugHint" class="legend" style="margin:0" aria-live="polite"></div>
       <div id="sugList"></div>
       <div id="sugSend"></div>
-    </section>
-    <details class="more" id="moreBox"><summary>Otros alimentos <small>No están en tu menú. Márcalos si los tienes en casa y te sugeriré platos con ellos.</small></summary><div id="moreGrid"></div></details>
-    <div class="staples"><b>Siempre en casa:</b> aceite de oliva (de la cooperativa), sal, ajo, pimentón, comino, laurel, orégano, perejil, canela y vinagre.</div>
-    <div class="reset" id="resetBox"></div>
+      </div>
+    </details>
     <div class="sync" id="sync">Guardando en este dispositivo…</div>
   </section>
 </div>
@@ -2347,7 +2357,7 @@ function renderShop(){
   $("eBuy").textContent = `por comprar (${personas} ${personas===1?"persona":"personas"}${extraBuy.length?`, ${extraBuy.length} apuntados aparte`:""}) · unos ${eur(buy.reduce((s,i)=>s+ING[i].p*needs[i],0) + extraBuy.reduce((s,i)=>s+ING[i].p,0))}`;
   $("extraBox").innerHTML = extraBuy.length ? `<div class="extrabox"><h3 class="sec" style="display:flex;justify-content:space-between;align-items:center">Apuntado para platos sueltos <button class="linkbtn" id="extraClear">Quitar todo</button></h3><div class="grid">${extraBuy.map(i=>tile(i)).join("")}</div></div>` : "";
   { const q = nrm($("shopQ").value || ""); 
-    $("shopSearch").innerHTML = q.length>=2 ? (()=>{ const m = Object.keys(ING).filter(i=>nrm(ING[i].n).includes(q)); return m.length ? `<h3 class="sec">Resultados</h3><div class="grid">${m.map(i=>tile(i, needs[i])).join("")}</div>` : `<p class="legend">No hay ningún alimento con «${esc($("shopQ").value)}». Puedes sugerirlo abajo.</p>`; })() : ""; }
+    $("shopSearch").innerHTML = q.length>=2 ? (()=>{ const m = Object.keys(ING).filter(i=>nrm(ING[i].n).includes(q)); return m.length ? `<h3 class="sec">Resultados</h3><div class="grid">${m.map(i=>tile(i, needs[i])).join("")}</div>` : `<p class="legend">No hay ningún alimento con «${esc($("shopQ").value)}».</p><button class="btn" data-sugq="1">💡 Sugerir «${esc($("shopQ").value.trim())}»</button>`; })() : ""; }
   $("nHave").textContent = have.size;
   $("tabBadge").textContent = (buy.length + extraBuy.length) || "";
   $("tabBadge").hidden = !(buy.length + extraBuy.length);
@@ -2611,8 +2621,27 @@ function sugState(s){
   const r = remoteSugs.find(x=>nrm(x.texto)===nrm(s.texto) && x.estado && x.estado!=="pendiente");
   return r ? {...s, estado:r.estado, nota:r.nota} : s;
 }
+const LSV = "micocina.sugVistas";
+let sugSeen = new Set();
+try { const v = JSON.parse(localStorage.getItem(LSV) || "null"); if (Array.isArray(v)) sugSeen = new Set(v); } catch(e) {}
+const sugKey = (s) => nrm(s.texto) + "|" + s.estado;
+function markSugSeen(){
+  sugs.map(sugState).filter(s=>s.estado && s.estado!=="pendiente").forEach(s=>sugSeen.add(sugKey(s)));
+  try { localStorage.setItem(LSV, JSON.stringify([...sugSeen])); } catch(e) {}
+  renderSugCount();
+}
+function renderSugCount(){
+  const all = sugs.map(sugState);
+  const fresh = all.filter(s=>s.estado && s.estado!=="pendiente" && !sugSeen.has(sugKey(s))).length;
+  const pend = all.filter(s=>(s.estado||"pendiente")==="pendiente").length;
+  const c = $("sugCount"); if (!c) return;
+  c.className = "sugcount" + (fresh ? " new" : "");
+  c.textContent = fresh ? `Novedades (${fresh})` : pend ? `${pend} ${pend===1?"pendiente":"pendientes"}` : "";
+}
 function renderSug(){
   if (!$("sugList")) return;
+  renderSugCount();
+  if ($("sugBox").open) markSugSeen();
   const list = sugs.map(sugState).sort((a,b)=>String(b.fecha||"").localeCompare(String(a.fecha||"")));
   const label = {pendiente:`Pendiente · se revisa ${nextThursday()}`, añadido:"Añadido", duplicado:"Ya estaba en la app", descartado:"Descartado"};
   $("sugList").innerHTML = list.length ? list.map(s=>{
@@ -2656,6 +2685,7 @@ async function delSug(id){
 async function loadRemoteSugs(){
   try { const r = await fetch("sugerencias.json", {cache:"no-store"}); if (r.ok){ const j = await r.json(); if (Array.isArray(j)) { remoteSugs = j; renderSug(); } } } catch(e) {}
 }
+document.addEventListener("toggle", (e) => { if (e.target.id==="sugBox" && e.target.open) markSugSeen(); }, true);
 document.addEventListener("submit", (e) => { if (e.target.id==="sugForm"){ e.preventDefault(); addSug($("sugIn").value); } });
 document.addEventListener("input", (e) => { if (e.target.id==="sugIn") sugHint(); });
 document.addEventListener("click", (e) => {
@@ -2668,6 +2698,7 @@ document.addEventListener("click", (e) => {
   const t = e.target.closest("button");
   if (!t) { if (e.target.id==="sheet") closeSheet(); return; }
   if (t.dataset.v) { if (mode) closeSheet(); return show(t.dataset.v); }
+  if (t.dataset.sugq) { const v = $("shopQ").value.trim(); addSug(v); $("shopQ").value = ""; renderShop(); return toast(`Sugerido: ${v}. Lo reviso ${nextThursday()}.`); }
   if (t.dataset.place) return openPlace(t.dataset.place);
   if (t.dataset.placeat && placeKey) { const [i,m] = t.dataset.placeat.split("-"); const k = placeKey; menu[+i][m] = {r:k}; saveMenu(); placeKey = null; $("sheet").hidden = true; mode = null; document.body.style.overflow=""; renderAll(); return toast(`${R[k].n}: ${DAYS[+i].toLowerCase()}, ${MEALS[m].toLowerCase()}`); }
   if (t.dataset.addmiss) { const miss = missingRecipe(t.dataset.addmiss); miss.forEach(i=>extra.add(i)); saveExtra(); renderShop(); return toast(`Apuntado en la compra: ${miss.map(i=>ING[i].n.toLowerCase()).join(", ")}`); }
