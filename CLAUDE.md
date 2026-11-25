@@ -30,6 +30,7 @@ Pensada para bajar el colesterol y con poco presupuesto. Todo en español de Esp
 - Las recetas no tienen que ser bajas en colesterol (dicho por Alejandro): platos de todo tipo, también lasaña, carbonara, croquetas, fritos… Las que no convengan se marcan `col:false` (o lo hacen sus alimentos) y el menú «Bajo en colesterol» ya las excluye. Aceite de oliva con medida.
 - Baratas, con ingredientes de supermercado español. Sin alcachofa (no le gusta). La pasta le encanta.
 - Pasos cortos y concretos (3–6), con tiempos y temperaturas. Cantidades en `ing` con número delante para que se puedan escalar.
+- **Mínimo 20 recetas por ingrediente** (petición de Alejandro, 25/11): todos los alimentos de `ING` aparecen en 20 recetas o más. Al añadir un alimento nuevo, crea las recetas que hagan falta para llegar a 20 (combinándolo con distintas carnes, pescados, verduras y especias). El bloque `/*A3-INICIO … A3-FIN*/` contiene las ~640 recetas de esa ampliación (claves `rN_M`).
 
 ## Proceso semanal de sugerencias (cada jueves, automático)
 
@@ -38,7 +39,7 @@ Pensada para bajar el colesterol y con poco presupuesto. Todo en español de Esp
    - GitHub: issues abiertos de este repositorio cuyo título empiece por "Sugerencia" (`gh api repos/Imberbe/mi-cocina/issues`). Cada línea `- alimento` del cuerpo es una sugerencia.
 2. **Análisis de duplicidad**: normaliza (minúsculas, sin tildes, singular) y compara cada sugerencia con los nombres de `ING` y con las demás sugerencias. Sinónimos cuentan como duplicado (p. ej. "pechuga de pollo" = pollo).
    No se descarta nada por salud: lo que no convenga con el colesterol se añade igual con `col:false`. Solo es `descartado` lo que no sea un alimento.
-3. **Añadir** cada alimento nuevo a `ING` y `PACK`, y crear **2 o 3 recetas nuevas** con él (al menos una comida o cena), siguiendo las reglas.
+3. **Añadir** cada alimento nuevo a `ING` y `PACK`, y crear recetas con él hasta que aparezca en **al menos 20** (al menos la mitad comidas o cenas), siguiendo las reglas.
 4. **Probar** con Playwright a 400 px: sin errores de consola y que cada receta nueva se abre. Comprueba que todo `ing` existe en `ING`.
 5. **Publicar**:
    - Claude: `Artifact` `read` de la URL y después `publish` con `url` y `file_path` = `src/mi-cocina.html`.
