@@ -104,6 +104,16 @@ button:focus-visible,.tile:focus-visible{outline:2px solid var(--accent);outline
 .tile[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
 .tile[aria-pressed="true"] .mark{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .tile[aria-pressed="false"] .ic{opacity:.9}
+.tile .lv{display:block;width:60%;height:5px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:2px}
+.tile .lv i{display:block;height:100%;background:var(--accent)}
+.tile .lvt{font-size:.68rem;font-weight:600;color:var(--accent)}
+.tile.low .lv i{background:#C9902A}
+.tile.low .lvt{color:#9A6A10}
+.tile .use{font-size:.68rem;color:var(--muted);line-height:1.25}
+.tile .q.short{color:var(--miss);font-weight:600}
+.tip{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;margin:10px 0;display:grid;gap:6px;font-size:.85rem}
+.tip > span{color:var(--muted)}
+.btnchip{cursor:pointer;border:1px solid var(--accent);color:var(--accent);background:var(--bg)}
 .reset{margin-top:18px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-weight:600;font-size:.85rem}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
@@ -290,6 +300,7 @@ details.ckmore > summary{cursor:pointer;font-family:var(--f-display);font-weight
     <h2 style="margin-bottom:12px">Menú de la semana</h2>
     <p class="weekhint">Pulsa «Crear menú» para elegir personas y opciones paso a paso, o toca cualquier plato para cambiarlo. La lista de la compra se ajusta sola.</p>
     <div id="cfgBox"></div>
+    <div id="weekTips"></div>
     <div id="weekBox"></div>
     <div class="reset" id="menuResetBox"></div>
   </section>
@@ -315,7 +326,7 @@ details.ckmore > summary{cursor:pointer;font-family:var(--f-display);font-weight
       <div class="sum buy"><b id="nBuy">0</b><small id="eBuy">por comprar</small></div>
       <div class="sum"><b id="nHave">0</b><small>ya en casa</small></div>
     </div>
-    <p class="legend">Aquí está lo que necesitas para tu menú. Toca un alimento para marcarlo cuando lo tengas en casa; lo que no esté marcado sigue en la lista.</p>
+    <p class="legend">Aquí está lo que necesitas para tu menú y cuánto gastas de cada cosa. Toca un alimento cuando lo tengas en casa; si te queda poco, vuelve a tocarlo: <b>Lleno → La mitad → Poco → No tengo</b>. Si lo que queda no llega para la semana, te lo pongo para comprar.</p>
     <div class="seg filter" id="filterSeg" role="group" aria-label="Filtrar">
       <button id="f-all" data-f="all">Todo</button>
       <button id="f-buy" data-f="buy">Por comprar</button>
@@ -993,9 +1004,10 @@ function leadNum(s){
 /* Parte de un envase que gasta una receta (para la cantidad base) */
 function packUse(id, amt){
   const P = PACK[id] || {f:.2}; const s = String(amt);
-  if (/cuchar|puñado|hojas|al gusto|chorrito/.test(s)) return P.f ?? .1;
+  if (/cuchar|puñado|\bhojas?\b|al gusto|chorrito|pizca/.test(s)) return P.f ?? .1;
   if (P.g){ const m = s.match(/(\d+(?:[.,]\d+)?)\s*g\b/); if (m) return parseFloat(m[1].replace(",","."))/P.g; }
   if (P.ml){ const m = s.match(/(\d+)\s*ml/); if (m) return +m[1]/P.ml; }
+  if (P.u && /rodaja|loncha|filete/.test(s)){ const v = leadNum(s); if (v != null) return v/P.u; }
   if (P.n){ const v = leadNum(s); if (v != null) return v/P.n; }
   return P.f ?? .2;
 }
@@ -2317,6 +2329,13 @@ Object.assign(R, {
   r8_13:{"n": "Jabalí a la mejorana con patatas panaderas", "pool": "m", "cat": "car", "t": "50 min", "r": "2 raciones", "base": "#6A3A22", "em": ["🐗", "🥔", "🌿"], "ing": [["jabali", "300 g"], ["patata", "3"], ["cebolla", "1"], ["mejorana", "1 cucharadita"], ["tomillo", "1 pizca"], ["aceite", "2 cucharadas"], ["sal", "1 pizca"]], "steps": ["Hornea la patata y la cebolla en rodajas con aceite y sal 25 minutos a 190 °C.", "Pon encima el jabalí en filetes con mejorana y tomillo.", "Hornea 15 minutos más."], "col": false},
 });
 /*A3-FIN*/
+/* Envases: unidades sueltas para que la compra cuadre (25/11) */
+Object.assign(PACK.repollo, {g:1000}); PACK.lechuga = {n:1, f:.1}; PACK.mozzarella.n = 1; PACK.esparragos.n = 12; PACK.aceitunas.n = 60;
+PACK.quesoCabra.u = 10; PACK.lomo.u = 5; PACK.jamonYork.u = 10; PACK.jamonSerrano.u = 8; PACK.pina.u = 10;
+/* Frescos que no aguantan la semana: el menú los pone primero */
+const FRESH = {sardinasFrescas:2, dorada:2, pollo:2, pavo:2, lomo:2, carnePicada:2, ternera:2, costillas:2, salchichas:2, corzo:2, jabali:2,
+  espinacas:1, lechuga:1, champis:1, quesoBurgos:1, mozzarella:1, requeson:1, salmonAhumado:1, acelgas:1, esparragos:1};
+const freshOf = (k) => R[k].ing.reduce((m,[id])=>Math.max(m, FRESH[id]||0), 0);
 
 Object.assign(R, {
   /* Desayunos dulces */
@@ -3000,16 +3019,32 @@ function buildMenu(list, seed, fueraFinde){
   const poolM = Object.keys(R).filter(k=>R[k].pool==="m" && P.okM(k));
   const poolD = Object.keys(R).filter(k=>R[k].pool==="d" && P.okD(k) && !R[k].pp);
   const cheapCut = (list) => { if (!P.cheap) return list; const s = [...list].sort((a,b)=>costOf(a)-costOf(b)); return s.slice(0, Math.max(3, Math.ceil(s.length*.6))); };
+  /* Lo que queda abierto de cada envase (empieza con lo que hay en casa) */
+  const rem = {};
+  Object.keys(ING).forEach(id=>{ if (ING[id].s!=="especias" && have.has(id)) rem[id] = level(id); });
+  const gain = (k) => R[k].ing.reduce((g,[id,a])=>{
+    if (ING[id].s==="especias") return g;
+    const u = packUse(id,a)*factor(k);
+    return g + ((rem[id]||0) > .05 ? 1.6*Math.min(1, rem[id]/Math.max(u,.05)) : -.7);
+  }, 0);
+  const consume = (k) => R[k].ing.forEach(([id,a])=>{
+    if (ING[id].s==="especias") return;
+    const u = packUse(id,a)*factor(k), r = rem[id]||0;
+    rem[id] = r >= u ? r - u : (Math.ceil(u - r - 1e-9) + r) - u;
+  });
   function pickFrom(list, prefer){
     let cand = list.filter(k=>!used.has(k));
     if (prefer){ const pc = cand.filter(prefer); if (pc.length) cand = pc; }
     if (!cand.length) cand = list;
     if (!cand.length) return null;
-    const k = cand[Math.floor(rnd()*cand.length)]; used.add(k); return k;
+    /* Preferir platos que gastan lo ya abierto o lo que hay en casa, con algo de azar para variar */
+    let best = null, bs = -1e9;
+    cand.forEach(k=>{ const sc = gain(k) + rnd()*2.2; if (sc > bs){ bs = sc; best = k; } });
+    used.add(best); consume(best); return best;
   }
-  /* Desayunos: variados, sin repetir mientras se pueda */
-  const dl = shuffle(cheapCut(poolD.length ? poolD : Object.keys(R).filter(k=>R[k].pool==="d")).slice(), rnd);
-  for (let i=0;i<7;i++) out[i].d = {r: dl[i % dl.length]};
+  /* Desayunos: variados y aprovechando envases */
+  const dpool = cheapCut(poolD.length ? poolD : Object.keys(R).filter(k=>R[k].pool==="d"));
+  for (let i=0;i<7;i++) out[i].d = {r: pickFrom(dpool)};
   /* Comidas y cenas: reparto de tipos de plato */
   let cats = [];
   Object.entries(quotas(P.w, days*2)).forEach(([c,n])=>{ for(let i=0;i<n;i++) cats.push(c); });
@@ -3040,6 +3075,13 @@ function buildMenu(list, seed, fueraFinde){
     }
   }
   fill("c", lunch); fill("n", dinner);
+  /* Lo fresco (carne y pescado fresco, hoja verde) los primeros días */
+  ["c","n"].forEach(meal=>{
+    const units = [];
+    for (let i=0;i<days;i++){ const s = out[i][meal]; if (!s || s.sobras) continue; const two = out[i+1] && i+1<days && out[i+1][meal] && out[i+1][meal].sobras && out[i+1][meal].r===s.r; units.push({s, two, f:freshOf(s.r), o:units.length}); }
+    units.sort((a,b)=>b.f-a.f || a.o-b.o);
+    let i = 0; units.forEach(u=>{ out[i][meal] = u.s; i++; if (u.two){ out[i][meal] = {r:u.s.r, sobras:true}; i++; } });
+  });
   for (let i=0;i<7;i++){
     if (i>=days){ out[i].c = {fuera:true}; out[i].n = {fuera:true}; }
     out[i].c = out[i].c || {fuera:true}; out[i].n = out[i].n || {fuera:true};
@@ -3102,17 +3144,51 @@ function slotIngs(slot){
 function missingFor(slot){ return slotIngs(slot).filter(id => !have.has(id)); }
 function missingRecipe(rid){ return R[rid].ing.map(x=>x[0]).filter(id=>!have.has(id)); }
 /* Envases necesarios para todo el menú, según personas */
-function menuNeeds(){
-  const use = {};
+function menuUse(){
+  const use = {}, dishes = {};
   menu.forEach(day => ["d","c","n"].forEach(m => {
     const s = day[m]; if (!s || s.fuera) return;
     if (s.sobras){ (s.need||[]).forEach(id=>{ use[id]=(use[id]||0) + packUse(id,"1")*personas; }); return; }
     const f = factor(s.r);
-    R[s.r].ing.forEach(([id,a])=>{ use[id]=(use[id]||0) + packUse(id,a)*f; });
+    R[s.r].ing.forEach(([id,a])=>{ use[id]=(use[id]||0) + packUse(id,a)*f; dishes[id]=(dishes[id]||0)+1; });
   }));
-  const out = {};
+  return {use, dishes};
+}
+function menuNeeds(){
+  const {use} = menuUse(); const out = {};
   Object.keys(ING).forEach(id=>{ if (use[id]) out[id] = Math.max(1, Math.ceil(use[id] - .12)); });
   return out;
+}
+/* Cuánto queda en casa: 1 lleno · .5 la mitad · .2 poco */
+let lvl = {};
+try { const v = JSON.parse(localStorage.getItem("micocina.niveles") || "null"); if (v && typeof v==="object") lvl = v; } catch(e) {}
+const level = (i) => have.has(i) ? (lvl[i] || 1) : 0;
+const LVNAME = {1:"Lleno", .5:"Queda la mitad", .2:"Queda poco"};
+/* Plan de compra: lo que gasta el menú, lo que hay en casa y lo que falta comprar */
+function shopPlan(){
+  const {use, dishes} = menuUse(); const plan = {};
+  Object.keys(use).forEach(id=>{
+    if (!ING[id]) return;
+    const u = use[id], lv = level(id), left = u - lv;
+    const buy = left > .12 ? Math.max(1, Math.ceil(left - .12)) : 0;
+    plan[id] = {use:u, dishes:dishes[id]||0, lv, buy, spare:(lv + buy) - u};
+  });
+  return plan;
+}
+function amountText(id, packs){
+  const P = PACK[id] || {};
+  const r = (v, st) => Math.max(st, Math.round(v/st)*st);
+  if (P.g) return `${r(packs*P.g, P.g>=500?50:10)} g`;
+  if (P.ml) return `${r(packs*P.ml, 50)} ml`;
+  if (P.n && P.n>1) { const v = Math.round(packs*P.n*2)/2; return `${String(v).replace(".",",")}`; }
+  return packs >= .9 ? "casi todo" : packs >= .4 ? "la mitad" : "un poco";
+}
+function useText(id, pl){
+  if (ING[id].s === "especias") return `${pl.dishes} ${pl.dishes===1?"plato":"platos"}`;
+  const P = PACK[id] || {};
+  const total = (pl.lv + pl.buy) || 1;
+  const of = P.g || P.ml ? ` de ${amountText(id, total)}` : (P.n>1 ? ` de ${P.n*total}` : "");
+  return `Gastas ${amountText(id, Math.min(pl.use, total))}${of} · ${pl.dishes} ${pl.dishes===1?"plato":"platos"}`;
 }
 function menuIngs(){ return Object.keys(menuNeeds()); }
 
@@ -3272,8 +3348,23 @@ function finishWizard(){
   $("sheet").hidden = true; mode = null; document.body.style.overflow="";
   renderAll();
 }
+function renderWeekTips(){
+  const box = $("weekTips"); if (!box) return;
+  const freeze = {};
+  menu.forEach((day,i)=>{ if (i<3) return; ["c","n"].forEach(m=>{ const s = day[m]; if (!s || s.fuera || s.sobras) return;
+    R[s.r].ing.forEach(([id])=>{ if (FRESH[id]===2 && !(id in freeze)) freeze[id] = i; }); }); });
+  const fz = Object.entries(freeze);
+  const plan = shopPlan();
+  const LONG = ["patata","cebolla","zanahoria","calabaza","limon","fruta","boniato","judias","guisantes","frutos","leche","yogur","huevos","claras","quesoBatido","tortillas"];
+  const spare = Object.keys(plan).filter(i=>(FRESH[i] || ING[i].s==="fruta" || i==="tofu") && !LONG.includes(i) && plan[i].spare >= .35 && plan[i].buy>0)
+    .sort((a,b)=>plan[b].spare-plan[a].spare).slice(0,6);
+  let h = "";
+  if (fz.length) h += `<div class="tip"><b>🧊 Congela al volver de la compra</b><span>${fz.map(([id,i])=>`${esc(ING[id].n.toLowerCase())} (lo usas el ${DAYS[i].toLowerCase()})`).join(", ")}. Sácalo a la nevera la noche antes.</span></div>`;
+  if (spare.length) h += `<div class="tip"><b>♻️ Te va a sobrar</b><span>Para no tirarlo, toca y te enseño platos con ello:</span><div class="chips">${spare.map(i=>`<button class="chip btnchip" data-ingideas="${i}">${esc(ING[i].n)} · ${esc(amountText(i, plan[i].spare))}</button>`).join("")}</div></div>`;
+  box.innerHTML = h;
+}
 function renderWeek(){
-  renderConfig();
+  renderConfig(); renderWeekTips();
   const today = nowInfo().dayIdx;
   $("weekBox").innerHTML = menu.map((day,i)=>`<div class="day${i===today?" today":""}"><header><h3>${DAYS[i]}</h3>${i===today?`<span class="pill">Hoy</span>`:""}</header>
     <div class="meals">${["d","c","n"].map(m=>{
@@ -3287,37 +3378,53 @@ function renderWeek(){
 }
 
 /* ---------- Compra ---------- */
-function tile(i, packs){
-  const on = have.has(i);
-  const qty = packs && packs>1 ? `${packs} × ${ING[i].q}` : ING[i].q;
-  const price = ING[i].p * (packs||1);
-  return `<button class="tile" data-toggle="${i}" aria-pressed="${on}" aria-label="${esc(ING[i].n)}: ${on?"en casa":"por comprar"}">
-    <span class="mark">✓</span><span class="ic">${icon(i)}</span><span class="n">${esc(ING[i].n)}</span><span class="q">${esc(qty)} · ${eur(price)}</span></button>`;
+function tile(i, packs, pl){
+  const on = have.has(i), lv = level(i);
+  let lines;
+  if (pl){
+    const buy = pl.buy;
+    const qty = buy ? `Compra ${buy>1?buy+" × ":""}${ING[i].q} · ${eur(ING[i].p*buy)}` : "No hace falta comprar";
+    lines = `<span class="q ${buy&&on?"short":""}">${esc(on && buy ? `No llega. ${qty}` : qty)}</span><span class="use">${esc(useText(i, pl))}</span>`;
+  } else {
+    const qty = packs && packs>1 ? `${packs} × ${ING[i].q}` : ING[i].q;
+    lines = `<span class="q">${esc(qty)} · ${eur(ING[i].p * (packs||1))}</span>`;
+  }
+  const lvBar = on ? `<span class="lv" aria-hidden="true"><i style="width:${Math.round(lv*100)}%"></i></span><span class="lvt">${LVNAME[lv]||""}</span>` : "";
+  return `<button class="tile${on&&lv<1?" low":""}" data-cycle="${i}" aria-pressed="${on}" aria-label="${esc(ING[i].n)}: ${on?(LVNAME[lv]||"en casa"):"no lo tienes"}. Toca para cambiar">
+    <span class="mark">✓</span><span class="ic">${icon(i)}</span><span class="n">${esc(ING[i].n)}</span>${lvBar}${lines}</button>`;
 }
-function groupBySec(ids, needs){
+function saveLvl(){ try { localStorage.setItem("micocina.niveles", JSON.stringify(lvl)); } catch(e) {} }
+/* Tocar un alimento: no lo tengo → lleno → la mitad → poco → no lo tengo */
+function cycle(id){
+  if (!have.has(id)) { have.add(id); delete lvl[id]; if (extra.delete(id)) { try { localStorage.setItem("micocina.extra", JSON.stringify([...extra])); } catch(e) {} } }
+  else { const c = lvl[id] || 1; if (c === 1) lvl[id] = .5; else if (c === .5) lvl[id] = .2; else { have.delete(id); delete lvl[id]; } }
+  saveLvl(); persist(); renderNow(); renderShop(); renderCocina(); renderWeekTips();
+}
+function groupBySec(ids, needs, plan){
   let html = "";
   for (const s of Object.keys(SEC)){
     const list = ids.filter(i=>ING[i].s===s);
-    if (list.length) html += `<h3 class="sec">${SEC[s]}</h3><div class="grid">${list.map(i=>tile(i, needs&&needs[i])).join("")}</div>`;
+    if (list.length) html += `<h3 class="sec">${SEC[s]}</h3><div class="grid">${list.map(i=>tile(i, needs&&needs[i], plan&&plan[i])).join("")}</div>`;
   }
   return html;
 }
 function renderShop(){
-  const needs = menuNeeds();
-  const need = Object.keys(needs);
-  const buy = need.filter(i=>!have.has(i));
-  const extraBuy = [...extra].filter(i=>!have.has(i) && !needs[i]);
+  const plan = shopPlan();
+  const needs = {}; Object.keys(plan).forEach(i=>needs[i]=plan[i].buy||1);
+  const need = Object.keys(plan);
+  const buy = need.filter(i=>plan[i].buy>0);
+  const extraBuy = [...extra].filter(i=>!have.has(i) && !plan[i]);
   $("nBuy").textContent = buy.length + extraBuy.length;
-  $("eBuy").textContent = `por comprar (${personas} ${personas===1?"persona":"personas"}${extraBuy.length?`, ${extraBuy.length} apuntados aparte`:""}) · unos ${eur(buy.reduce((s,i)=>s+ING[i].p*needs[i],0) + extraBuy.reduce((s,i)=>s+ING[i].p,0))}`;
+  $("eBuy").textContent = `por comprar (${personas} ${personas===1?"persona":"personas"}${extraBuy.length?`, ${extraBuy.length} apuntados aparte`:""}) · unos ${eur(buy.reduce((s,i)=>s+ING[i].p*plan[i].buy,0) + extraBuy.reduce((s,i)=>s+ING[i].p,0))}`;
   $("extraBox").innerHTML = extraBuy.length ? `<div class="extrabox"><h3 class="sec" style="display:flex;justify-content:space-between;align-items:center">Apuntado para platos sueltos <button class="linkbtn" id="extraClear">Quitar todo</button></h3><div class="grid">${extraBuy.map(i=>tile(i)).join("")}</div></div>` : "";
   { const q = nrm($("shopQ").value || ""); 
-    $("shopSearch").innerHTML = q.length>=2 ? (()=>{ const m = Object.keys(ING).filter(i=>nrm(ING[i].n).includes(q)); return m.length ? `<h3 class="sec">Resultados</h3><div class="grid">${m.map(i=>tile(i, needs[i])).join("")}</div>` : `<p class="legend">No hay ningún alimento con «${esc($("shopQ").value)}».</p><button class="btn" data-sugq="1">💡 Sugerir «${esc($("shopQ").value.trim())}»</button>`; })() : ""; }
+    $("shopSearch").innerHTML = q.length>=2 ? (()=>{ const m = Object.keys(ING).filter(i=>nrm(ING[i].n).includes(q)); return m.length ? `<h3 class="sec">Resultados</h3><div class="grid">${m.map(i=>tile(i, needs[i], plan[i])).join("")}</div>` : `<p class="legend">No hay ningún alimento con «${esc($("shopQ").value)}».</p><button class="btn" data-sugq="1">💡 Sugerir «${esc($("shopQ").value.trim())}»</button>`; })() : ""; }
   $("nHave").textContent = have.size;
   $("tabBadge").textContent = (buy.length + extraBuy.length) || "";
   $("tabBadge").hidden = !(buy.length + extraBuy.length);
   ["all","buy","have"].forEach(k=>$("f-"+k).setAttribute("aria-pressed", String(filter===k)));
-  const shown = need.filter(i => filter==="all" || (filter==="buy" ? !have.has(i) : have.has(i)));
-  $("shopBox").innerHTML = shown.length ? groupBySec(shown, needs)
+  const shown = need.filter(i => filter==="all" || (filter==="buy" ? plan[i].buy>0 : have.has(i)));
+  $("shopBox").innerHTML = shown.length ? groupBySec(shown, needs, plan)
     : `<p class="legend" style="margin-top:16px">${filter==="buy"?"No te falta nada para tu menú: lo tienes todo en casa.":"Todavía no has marcado nada de tu menú como «en casa»."}</p>`;
   const others = Object.keys(ING).filter(i=>!needs[i]);
   $("moreGrid").innerHTML = groupBySec(others);
@@ -3362,6 +3469,7 @@ function ckFilterKeys(){
     if (ck.rap && minutes(k) > (r.pool==="d"?10:20)) return false;
     if (ck.veg && has(k,[...MEAT,...FISH,"jamonYork"])) return false;
     if (ck.cat!=="all" && r.cat!==ck.cat) return false;
+    if (ck.ing && !r.ing.some(x=>x[0]===ck.ing)) return false;
     return true;
   });
 }
@@ -3385,7 +3493,8 @@ function renderCocina(){
   $("ckCats").innerHTML = [["all","Cualquier tipo"],...cats].map(([k,l])=>`<button data-ckcat="${k}" aria-pressed="${ck.cat===k}">${l}</button>`).join("");
   const list = rankDishes(ckFilterKeys());
   const can = list.filter(a=>!a.miss.length), one = list.filter(a=>a.miss.length===1), two = list.filter(a=>a.miss.length===2);
-  $("ckIntro").textContent = have.size
+  if (ck.ing && ING[ck.ing]) $("ckToggles").insertAdjacentHTML("afterbegin", `<button class="tog" data-ckingclear="1" aria-pressed="true">Con ${esc(ING[ck.ing].n.toLowerCase())} ✕</button>`);
+  $("ckIntro").textContent = ck.ing && ING[ck.ing] ? `Platos con ${ING[ck.ing].n.toLowerCase()}, para gastar lo que te sobra.` : have.size
     ? `Con los ${have.size} alimentos que tienes marcados en casa. Primero van los platos que aprovechan lo que antes se estropea.`
     : "Todavía no has marcado nada en casa. Ve a Compra y marca lo que tienes (el botón «Marcar lo de siempre» lo hace rápido).";
   const LIM = 12;
@@ -3507,7 +3616,7 @@ function persist(){
   try { localStorage.setItem(LS, JSON.stringify([...have])); } catch(e) {}
   if (!dbDespensa) return;
   clearTimeout(tHave);
-  tHave = setTimeout(()=>queueWrite(dbDespensa, {tengo:[...have], extra:[...extra], especias:1, actualizado:new Date().toISOString()}), 700);
+  tHave = setTimeout(()=>queueWrite(dbDespensa, {tengo:[...have], extra:[...extra], nivel:lvl, especias:1, actualizado:new Date().toISOString()}), 700);
 }
 function settings(){ return {personas, opts, applied, seed, fueraFinde}; }
 function saveMenu(){
@@ -3517,6 +3626,7 @@ function saveMenu(){
   tMenu = setTimeout(()=>queueWrite(dbMenu, {dias:clone(menu), ...settings(), actualizado:new Date().toISOString()}), 400);
 }
 function toggle(id){
+  delete lvl[id]; saveLvl();
   if (have.has(id)) have.delete(id); else { have.add(id); if (extra.delete(id)) { try { localStorage.setItem("micocina.extra", JSON.stringify([...extra])); } catch(e) {} } }
   persist(); renderNow(); renderShop(); renderCocina();
   if (mode==="recipe") renderRecipe(); else if (mode==="pick") renderPickList();
@@ -3532,7 +3642,7 @@ function toggle(id){
     dbSug.onSnapshot(snap => { sugs = snap.docs.map(d=>({id:d.id, ...d.data()})); renderSug(); }, () => {});
     dbDespensa.onSnapshot(snap => {
       if (snap.metadata.hasPendingWrites) return;
-      if (snap.exists){ const dd = snap.data(); const t = dd.tengo; if (Array.isArray(dd.extra)) extra = new Set(dd.extra.filter(k=>ING[k])); if (Array.isArray(t)) { have = new Set(t.filter(k=>ING[k])); if (!dd.especias) { STAPLES.forEach(i=>have.add(i)); persist(); } try{localStorage.setItem(LS, JSON.stringify([...have]));}catch(e){} renderNow(); renderShop(); renderCocina(); if (mode==="recipe") renderRecipe(); } }
+      if (snap.exists){ const dd = snap.data(); const t = dd.tengo; if (Array.isArray(dd.extra)) extra = new Set(dd.extra.filter(k=>ING[k])); if (dd.nivel && typeof dd.nivel==="object") { lvl = dd.nivel; saveLvl(); } if (Array.isArray(t)) { have = new Set(t.filter(k=>ING[k])); if (!dd.especias) { STAPLES.forEach(i=>have.add(i)); persist(); } try{localStorage.setItem(LS, JSON.stringify([...have]));}catch(e){} renderNow(); renderShop(); renderCocina(); if (mode==="recipe") renderRecipe(); } }
       $("sync").textContent = okMsg;
     }, () => { $("sync").textContent = localMsg; });
     dbMenu.onSnapshot(snap => {
@@ -3665,6 +3775,9 @@ document.addEventListener("click", (e) => {
   if (t.dataset.pick) return setSlot({r:t.dataset.pick});
   if (t.dataset.slot) { const [i,m] = t.dataset.slot.split("-"); return openPicker(i, m); }
   if (t.dataset.toggle) return toggle(t.dataset.toggle);
+  if (t.dataset.cycle) return cycle(t.dataset.cycle);
+  if (t.dataset.ingideas) { ck = {pool:"all", col:false, rap:false, veg:false, cat:"all", ing:t.dataset.ingideas}; ckOpen = {can:false, one:false}; show("cocina"); renderCocina(); window.scrollTo(0,0); return; }
+  if (t.dataset.ckingclear) { ck.ing = null; return renderCocina(); }
   if (t.dataset.personas) { personas = +t.dataset.personas; saveMenu(); return renderAll(); }
   if (t.dataset.wopt && wz) { const k = t.dataset.wopt; wz.opts = wz.opts.includes(k) ? wz.opts.filter(x=>x!==k) : [...wz.opts, k]; return renderWizard(); }
   if (t.dataset.wp && wz) { wz.personas = +t.dataset.wp; return renderWizard(); }
@@ -3695,8 +3808,8 @@ document.addEventListener("click", (e) => {
     case "menuYes": confirmMenu = false; menu = clone(MENU_BASE); applied = null; saveMenu(); return renderAll();
     case "resetAsk": confirmReset = true; return renderShop();
     case "resetNo": confirmReset = false; return renderShop();
-    case "resetYes": confirmReset = false; have = new Set([...have].filter(i=>ING[i].s==="especias")); persist(); return renderAll();
-    case "allHave": menuIngs().forEach(i=>have.add(i)); persist(); return renderAll();
+    case "resetYes": confirmReset = false; have = new Set([...have].filter(i=>ING[i].s==="especias")); Object.keys(lvl).forEach(i=>{ if (!have.has(i)) delete lvl[i]; }); saveLvl(); persist(); return renderAll();
+    case "allHave": { const pl = shopPlan(); Object.keys(pl).forEach(i=>{ if (pl[i].buy>0 || !have.has(i)) { have.add(i); delete lvl[i]; } }); saveLvl(); persist(); return renderAll(); }
   }
 });
 document.addEventListener("change", (e) => {
