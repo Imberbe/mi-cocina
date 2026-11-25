@@ -14,15 +14,15 @@ Pensada para bajar el colesterol y con poco presupuesto. Todo en español de Esp
 
 ## Cómo está hecha `src/mi-cocina.html`
 
-- `ING` = alimentos: `{n, e (emoji) o svg, q (envase), p (precio aprox. €), s: "fruta"|"fresco"|"despensa"}`.
+- `ING` = alimentos: `{n, e (emoji) o svg, q (envase), p (precio aprox. €), s: "fruta"|"fresco"|"despensa"|"especias"}`.
 - `PACK` = cuánto trae cada envase (`g`, `ml`, `n` o `f`). Todo alimento nuevo necesita su entrada en `PACK`.
-- `R` = recetas: `{n, pool:"d"|"m" (desayuno | comida/cena), cat, t ("20 min"), r ("1 ración"|"2 raciones"), base (color del plato o null), em (1–3 emojis), ing:[[id, cantidad]], basic (lo que siempre hay en casa), steps:[...], tip?}`.
+- `R` = recetas: `{n, pool:"d"|"m" (desayuno | comida/cena), cat, t ("20 min"), r ("1 ración"|"2 raciones"), base (color del plato o null), em (1–3 emojis), ing:[[id, cantidad]] (incluidos aceite, sal y especias), basic? (solo extras opcionales), steps:[...], tip?}`.
   `cat` de desayuno: `dulce`|`salado`. De comida/cena: `leg`|`pes`|`car`|`hue`|`ver`|`pas`.
 - `col:false` en una receta o un alimento = no recomendado con el colesterol alto: el menú «Bajo en colesterol» no lo usa y la receta muestra un aviso. Los alimentos de la lista `SALTY` (latas, aceitunas, embutido, quesos…) sacan la receta del menú «Bajo en sal»; añade ahí los alimentos salados nuevos.
 - El menú automático tiene tres secciones de opciones que se combinan (`OPTS` y `GROUPS`): Salud (bajo en colesterol, bajo en sal, equilibrado), Tipo de alimentación (rico en proteína, completo, vegetariano) y Tiempo y bolsillo (rápido, cocinar poco, económico). Se eligen en un asistente de 5 pasos (`openWizard`/`renderWizard`): personas, las tres secciones y un resumen con Finalizar.
 - Pestaña «🧺 Lo que tengo» (`renderCocina`): lista todos los platos según lo marcado en casa, en tres bloques (lo tienes todo / falta 1 / faltan 2), con filtros (`ck`) y orden por `PERISH` (primero lo que antes se estropea). Cada plato: «Al menú» (hoja `place`, elige día y comida) y «Apuntar lo que falta» (conjunto `extra`, guardado en `casa/despensa` como `extra` y mostrado en Compra). Al añadir alimentos frescos nuevos, ponlos en `PERISH` con peso 1–3.
 - Compra tiene buscador (`shopQ`; si no encuentra el alimento, ofrece sugerirlo) y botón «Marcar lo de siempre» (`BASICS`). Las sugerencias están abajo del todo de Compra, plegadas (`sugBox`), con contador de pendientes o «Novedades» cuando la revisión del jueves resuelve alguna (vistas en `micocina.sugVistas`). «Ahora» enseña solo 3 ideas y un enlace a la pestaña.
-- Siempre en casa (no van en `ing`): aceite de oliva (de la cooperativa familiar), sal, ajo, pimentón, comino, laurel, orégano, perejil, canela, vinagre.
+- Ya NO hay «siempre en casa» (decisión de Alejandro): aceite, sal, ajo, especias y hierbas son alimentos de la sección `s:"especias"` («Especias y condimentos», 36) y van en `ing` de cada receta con su cantidad ("1 cucharada", "1 pizca", "2 dientes"…). `basic` queda solo para extras opcionales y se muestra como «Además: …». El aceite de oliva sale de la cooperativa familiar (`p:0`). `STAPLES` se marcaron como «en casa» una sola vez al migrar; «Nueva semana: desmarcar todo» no desmarca las especias.
 
 ## Reglas para recetas nuevas
 
