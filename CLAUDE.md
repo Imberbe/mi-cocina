@@ -32,6 +32,7 @@ Pensada para bajar el colesterol y con poco presupuesto. Todo en español de Esp
 - Las recetas no tienen que ser bajas en colesterol (dicho por Alejandro): platos de todo tipo, también lasaña, carbonara, croquetas, fritos… Las que no convengan se marcan `col:false` (o lo hacen sus alimentos) y el menú «Bajo en colesterol» ya las excluye. Aceite de oliva con medida.
 - Baratas, con ingredientes de supermercado español. Sin alcachofa (no le gusta). La pasta le encanta.
 - Pasos cortos y concretos (3–6), con tiempos y temperaturas. Cantidades en `ing` con número delante para que se puedan escalar.
+- **Tipos de pasta** (25/11): además de `pasta` (integral) hay `espaguetis`, `macarrones`, `tallarines`, `helices`, `plumas`, `lazos` (secas, 500 g) y `tortellini`, `tortelliniQueso`, `raviolis`, `raviolisSetas` (frescas rellenas, 250 g, `col:false`). Usa el tipo concreto cuando el plato lo nombra. Precios orientativos de marca blanca (sin fuente verificada).
 - **Mínimo 20 recetas por ingrediente** (petición de Alejandro, 25/11): todos los alimentos de `ING` aparecen en 20 recetas o más. Al añadir un alimento nuevo, crea las recetas que hagan falta para llegar a 20 (combinándolo con distintas carnes, pescados, verduras y especias). El bloque `/*A3-INICIO … A3-FIN*/` contiene las ~640 recetas de esa ampliación (claves `rN_M`).
 
 ## Proceso semanal de sugerencias (cada jueves, automático)
