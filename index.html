@@ -122,6 +122,21 @@ button:focus-visible,.tile:focus-visible{outline:2px solid var(--accent);outline
 .tile.low .lvt{color:#9A6A10}
 .tile .use{font-size:.68rem;color:var(--muted);line-height:1.25}
 .tile .q.short{color:var(--miss);font-weight:600}
+.stars{display:flex;gap:2px;justify-content:center;align-items:center}
+.stars button{border:0;background:none;font-size:26px;line-height:1;color:var(--line);padding:2px 3px}
+.stars button.on{color:#E0A526}
+.stars button.s0{font-size:.75rem;font-weight:700;border:1.5px solid var(--line);border-radius:999px;width:28px;height:28px;color:var(--muted);margin-right:4px}
+.stars button.s0.on{background:var(--miss);border-color:var(--miss);color:#fff}
+.stars.big button{font-size:36px}
+.stars.big button.s0{font-size:.8rem;width:32px;height:32px}
+.head .btn[data-done]{margin-top:8px}
+.donelist{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+.donelist li{display:flex;gap:10px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:6px 10px}
+.donelist .ic{width:32px;height:32px;font-size:24px;display:grid;place-items:center}
+.donelist .ic svg{width:32px;height:32px}
+.donelist small{color:var(--muted)}
+.donepill{display:inline-block;margin-top:2px;font-size:.68rem;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:1px 8px}
+.toastbtn{margin-left:8px;border:0;background:var(--accent);color:var(--accent-ink);font-weight:700;border-radius:999px;padding:4px 10px}
 .tip{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;margin:10px 0;display:grid;gap:6px;font-size:.85rem}
 .tip > span{color:var(--muted)}
 .btnchip{cursor:pointer;border:1px solid var(--accent);color:var(--accent);background:var(--bg)}
@@ -1073,6 +1088,7 @@ function cleanSlot(s){
   if (!R[s.r]) return null;
   const o = {r:s.r};
   if (s.sobras) o.sobras = true;
+  if (s.hecho) o.hecho = true;
   if (typeof s.extra === "string") o.extra = s.extra;
   if (Array.isArray(s.need)) o.need = s.need.filter(k=>ING[k]);
   return o;
@@ -3049,8 +3065,9 @@ function buildMenu(list, seed, fueraFinde){
     if (!cand.length) cand = list;
     if (!cand.length) return null;
     /* Preferir platos que gastan lo ya abierto o lo que hay en casa, con algo de azar para variar */
+    const liked = cand.filter(k=>{ const e = starsOf(k); return e==null || e>1; }); if (liked.length) cand = liked;
     let best = null, bs = -1e9;
-    cand.forEach(k=>{ const sc = gain(k) + rnd()*2.2; if (sc > bs){ bs = sc; best = k; } });
+    cand.forEach(k=>{ const e = starsOf(k); const sc = gain(k) + rnd()*2.2 + (e==null ? 0 : (e-3)*.6); if (sc > bs){ bs = sc; best = k; } });
     used.add(best); consume(best); return best;
   }
   /* Desayunos: variados y aprovechando envases */
@@ -3174,7 +3191,7 @@ function menuNeeds(){
 let lvl = {};
 try { const v = JSON.parse(localStorage.getItem("micocina.niveles") || "null"); if (v && typeof v==="object") lvl = v; } catch(e) {}
 const level = (i) => have.has(i) ? (lvl[i] || 1) : 0;
-const LVNAME = {1:"Lleno", .5:"Queda la mitad", .2:"Queda poco"};
+const lvName = (v) => v >= .75 ? "Lleno" : v >= .35 ? "Queda la mitad" : "Queda poco";
 /* Plan de compra: lo que gasta el menú, lo que hay en casa y lo que falta comprar */
 function shopPlan(){
   const {use, dishes} = menuUse(); const plan = {};
@@ -3381,7 +3398,7 @@ function renderWeek(){
     <div class="meals">${["d","c","n"].map(m=>{
       const s = day[m];
       if (s.fuera) return `<button class="meal" data-slot="${i}-${m}" aria-label="${MEALS[m]} del ${DAYS[i]}: fuera. Cambiar"><span class="k">${MEALS[m]}</span>${outPlate()}<span class="n">Fuera</span><span class="edit">Cambiar</span></button>`;
-      return `<button class="meal" data-slot="${i}-${m}" aria-label="${MEALS[m]} del ${DAYS[i]}: ${esc(R[s.r].n)}. Cambiar"><span class="k">${MEALS[m]}</span>${plate(s.r)}<span class="n">${esc(R[s.r].n)}${s.sobras?" (sobras)":""}</span><span class="edit">Cambiar</span></button>`;
+      return `<button class="meal" data-slot="${i}-${m}" aria-label="${MEALS[m]} del ${DAYS[i]}: ${esc(R[s.r].n)}. Cambiar"><span class="k">${MEALS[m]}</span>${plate(s.r)}<span class="n">${esc(R[s.r].n)}${s.sobras?" (sobras)":""}</span>${s.hecho?`<span class="donepill">✓ Hecho</span>`:""}<span class="edit">Cambiar</span></button>`;
     }).join("")}</div></div>`).join("");
   $("menuResetBox").innerHTML = confirmMenu
     ? `<span>¿Volver al menú original de la semana?</span><button class="btn danger" id="menuYes">Sí, restablecer</button><button class="btn" id="menuNo">Cancelar</button>`
@@ -3400,15 +3417,15 @@ function tile(i, packs, pl){
     const qty = packs && packs>1 ? `${packs} × ${ING[i].q}` : ING[i].q;
     lines = `<span class="q">${esc(qty)} · ${eur(ING[i].p * (packs||1))}</span>`;
   }
-  const lvBar = on ? `<span class="lv" aria-hidden="true"><i style="width:${Math.round(lv*100)}%"></i></span><span class="lvt">${LVNAME[lv]||""}</span>` : "";
-  return `<button class="tile${on&&lv<1?" low":""}" data-cycle="${i}" aria-pressed="${on}" aria-label="${esc(ING[i].n)}: ${on?(LVNAME[lv]||"en casa"):"no lo tienes"}. Toca para cambiar">
+  const lvBar = on ? `<span class="lv" aria-hidden="true"><i style="width:${Math.round(lv*100)}%"></i></span><span class="lvt">${lvName(lv)}</span>` : "";
+  return `<button class="tile${on&&lv<.75?" low":""}" data-cycle="${i}" aria-pressed="${on}" aria-label="${esc(ING[i].n)}: ${on?(lvName(lv)):"no lo tienes"}. Toca para cambiar">
     <span class="mark">✓</span><span class="ic">${icon(i)}</span><span class="n">${esc(ING[i].n)}</span>${lvBar}${lines}</button>`;
 }
 function saveLvl(){ try { localStorage.setItem("micocina.niveles", JSON.stringify(lvl)); } catch(e) {} }
 /* Tocar un alimento: no lo tengo → lleno → la mitad → poco → no lo tengo */
 function cycle(id){
   if (!have.has(id)) { have.add(id); delete lvl[id]; if (extra.delete(id)) { try { localStorage.setItem("micocina.extra", JSON.stringify([...extra])); } catch(e) {} } }
-  else { const c = lvl[id] || 1; if (c === 1) lvl[id] = .5; else if (c === .5) lvl[id] = .2; else { have.delete(id); delete lvl[id]; } }
+  else { const c = lvl[id] || 1; if (c >= .75) lvl[id] = .5; else if (c >= .35) lvl[id] = .2; else { have.delete(id); delete lvl[id]; } }
   saveLvl(); persist(); renderNow(); renderShop(); renderCocina(); renderWeekTips();
 }
 function groupBySec(ids, needs, plan){
@@ -3470,7 +3487,7 @@ function rankDishes(keys){
     const use = R[k].ing.map(x=>x[0]).filter(id=>have.has(id) && PERISH[id]).sort((a,b)=>PERISH[b]-PERISH[a]);
     const score = use.reduce((s,id)=>s+PERISH[id],0);
     return {k, miss, use, score};
-  }).sort((a,b)=>a.miss.length-b.miss.length || b.score-a.score || minutes(a.k)-minutes(b.k));
+  }).sort((a,b)=>a.miss.length-b.miss.length || b.score-a.score || (starsOf(b.k)??2.5)-(starsOf(a.k)??2.5) || minutes(a.k)-minutes(b.k));
 }
 function ckFilterKeys(){
   return Object.keys(R).filter(k=>{
@@ -3479,6 +3496,7 @@ function ckFilterKeys(){
     if (ck.col && !colOk(k)) return false;
     if (ck.rap && minutes(k) > (r.pool==="d"?10:20)) return false;
     if (ck.veg && has(k,[...MEAT,...FISH,"jamonYork"])) return false;
+    if (ck.fav && !(starsOf(k) >= 4)) return false;
     if (ck.cat!=="all" && r.cat!==ck.cat) return false;
     if (ck.ing && !r.ing.some(x=>x[0]===ck.ing)) return false;
     return true;
@@ -3487,6 +3505,8 @@ function ckFilterKeys(){
 function ckCard(a){
   const r = R[a.k];
   const bits = [`⏱ ${r.t}`, servingsLabel(a.k)];
+  if (starsOf(a.k)!=null) bits.unshift(starText(a.k));
+  if (notas[a.k] && notas[a.k].n) bits.push(`hecho ${notas[a.k].n}×`);
   if (!colOk(a.k)) bits.push("⚠️ no apto colesterol");
   return `<div class="ck"><button class="ckmain" data-open="${a.k}">${plate(a.k)}<span><b>${esc(r.n)}</b><small>${esc(bits.join(" · "))}</small>
       ${a.use.length?`<small class="use">Aprovecha: ${esc(a.use.slice(0,3).map(i=>ING[i].n.toLowerCase()).join(", "))}</small>`:""}
@@ -3497,7 +3517,7 @@ function renderCocina(){
   const allCan = Object.keys(R).filter(k=>!missingRecipe(k).length).length;
   $("ckBadge").textContent = allCan || ""; $("ckBadge").hidden = !allCan;
   ["all","d","m"].forEach(k=>$("ckp-"+k).setAttribute("aria-pressed", String(ck.pool===k)));
-  $("ckToggles").innerHTML = [["col","💚 Aptos para el colesterol"],["rap","⏱️ Rápidos"],["veg","🥕 Vegetarianos"]]
+  $("ckToggles").innerHTML = [["fav","⭐ Mis favoritos"],["col","💚 Aptos para el colesterol"],["rap","⏱️ Rápidos"],["veg","🥕 Vegetarianos"]]
     .map(([k,l])=>`<button class="tog" data-cktog="${k}" aria-pressed="${ck[k]}">${l}</button>`).join("");
   const cats = ck.pool==="d" ? [["dulce","Dulces"],["salado","Salados"]] : ck.pool==="m" ? CATS.m.filter(([k])=>["leg","pes","car","hue","ver","pas"].includes(k)) : [["dulce","Desayunos dulces"],["salado","Desayunos salados"],...CATS.m.filter(([k])=>["leg","pes","car","hue","ver","pas"].includes(k))];
   if (ck.cat!=="all" && !cats.some(([k])=>k===ck.cat)) ck.cat = "all";
@@ -3535,13 +3555,14 @@ function renderPlace(){
     <div class="placegrid">${rows}</div></div>`;
 }
 let toastT = null;
-function toast(msg){ const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(()=>{ t.hidden = true; }, 2600); }
+function toast(msg, action){ const t = $("toast"); t.innerHTML = esc(msg) + (action ? ` <button class="toastbtn" id="toastAct">${esc(action)}</button>` : ""); t.hidden = false; clearTimeout(toastT); toastT = setTimeout(()=>{ t.hidden = true; }, action ? 6000 : 2600); }
 function saveExtra(){ try { localStorage.setItem("micocina.extra", JSON.stringify([...extra])); } catch(e) {} persist(); }
 
 /* ---------- Hoja: receta y selector de plato ---------- */
 let mode = null, cur = null, stepI = 0, showAll = false, pick = null, pickCat = "all", pickQ = "", backToPick = false;
 function openSheet(){ $("sheet").hidden = false; document.body.style.overflow="hidden"; $("panel").scrollTop = 0; }
 function closeSheet(){
+  if (mode==="done"){ doneKey = null; mode = "recipe"; return renderRecipe(); }
   if (mode==="place"){ placeKey = null; $("sheet").hidden = true; mode = null; document.body.style.overflow=""; return; }
   if (mode==="wiz"){ wz = null; $("sheet").hidden = true; mode = null; document.body.style.overflow=""; return; }
   if (mode==="recipe" && backToPick && pick){ backToPick = false; mode = "pick"; renderPicker(); return; }
@@ -3557,10 +3578,13 @@ function renderRecipe(){
     ? `<ol class="allsteps">${r.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol>`
     : `<div class="step"><div class="eyebrow">Paso ${stepI+1} de ${n}</div><div class="prog">${r.steps.map((_,i)=>`<i class="${i<=stepI?"on":""}"></i>`).join("")}</div>
         <p class="txt">${esc(r.steps[stepI])}</p>
-        <div class="stepnav"><button class="btn" id="stPrev" ${stepI===0?"disabled":""}>‹ Anterior</button>${last?`<button class="btn primary" id="stDone">¡Listo!</button>`:`<button class="btn primary" id="stNext">Siguiente ›</button>`}</div></div>`;
+        <div class="stepnav"><button class="btn" id="stPrev" ${stepI===0?"disabled":""}>‹ Anterior</button>${last?`<button class="btn primary" data-done="${cur}">✓ ¡Hecho!</button>`:`<button class="btn primary" id="stNext">Siguiente ›</button>`}</div></div>`;
   const note = Math.abs(f-1)>1e-6 ? `<p class="tip">Cantidades para ${personas} ${personas===1?"persona":"personas"}. Si un paso dice cuánta agua echar, multiplícala por ${fmtNum(f)}.</p>` : "";
   $("panel").innerHTML = `<button class="close" id="rClose" aria-label="${backToPick?"Volver":"Cerrar receta"}">${backToPick?"‹":"✕"}</button>
-    <div class="head">${plate(cur)}<h2 id="rTitle">${esc(r.n)}</h2><div class="meta"><span class="pill plain">⏱ ${r.t}</span><span class="pill plain">${esc(servingsLabel(cur))}</span></div></div>
+    <div class="head">${plate(cur)}<h2 id="rTitle">${esc(r.n)}</h2><div class="meta"><span class="pill plain">⏱ ${r.t}</span><span class="pill plain">${esc(servingsLabel(cur))}</span></div>
+      ${starsRow(cur, "data-rstar")}
+      <small class="legend" style="margin:0">${notas[cur]&&notas[cur].n ? `Lo has hecho ${notas[cur].n} ${notas[cur].n===1?"vez":"veces"} · última el ${new Date(notas[cur].f).toLocaleDateString("es-ES",{day:"numeric",month:"numeric"})}` : "Aún no lo has hecho. Valóralo cuando lo pruebes."}</small>
+      <button class="btn primary" data-done="${cur}">✓ Lo he hecho</button></div>
     ${backToPick?`<div style="text-align:center;margin-top:10px"><button class="btn primary" data-pick="${cur}">Poner en el menú</button></div>`:""}
     ${!colOk(cur) ? `<p class="warnbox">⚠️ No recomendado si tienes el colesterol alto. El menú bajo en colesterol no lo usa.</p>` : ""}
     ${(opts.includes("sal") || (applied && applied.includes("sal"))) ? (salOk(cur) ? `<p class="tip">Bajo en sal: no añadas sal o pon solo una pizca; da sabor con ajo, especias, limón y hierbas.</p>` : `<p class="warnbox">🧂 Lleva ingredientes salados (latas, aceitunas o embutido).</p>`) : ""}
@@ -3617,6 +3641,72 @@ function setSlot(val){
   renderAll();
 }
 
+/* ---------- Platos hechos y valoraciones ---------- */
+let notas = {};
+try { const v = JSON.parse(localStorage.getItem("micocina.notas") || "null"); if (v && typeof v==="object") notas = v; } catch(e) {}
+let dbNotas = null, tNotas = null;
+function saveNotas(){
+  try { localStorage.setItem("micocina.notas", JSON.stringify(notas)); } catch(e) {}
+  if (!dbNotas) return; clearTimeout(tNotas);
+  tNotas = setTimeout(()=>queueWrite(dbNotas, {notas, actualizado:new Date().toISOString()}), 500);
+}
+const starsOf = (k) => notas[k] && typeof notas[k].e === "number" ? notas[k].e : null;
+const starText = (k) => { const e = starsOf(k); return e==null ? "" : (e ? "★".repeat(e) : "0 ★"); };
+function starsRow(k, attr){
+  const e = starsOf(k);
+  return `<div class="stars" role="group" aria-label="Valoración de 0 a 5">
+    <button class="s0${e===0?" on":""}" ${attr}="0" aria-label="0 estrellas">0</button>${[1,2,3,4,5].map(n=>`<button class="${e!=null&&n<=e?"on":""}" ${attr}="${n}" aria-label="${n} ${n===1?"estrella":"estrellas"}">★</button>`).join("")}</div>`;
+}
+/* Lo que se descuenta de casa al hacer un plato */
+function cookPreview(k){
+  const f = factor(k);
+  return R[k].ing.filter(([id])=>have.has(id)).map(([id,a])=>{
+    const before = level(id), after = before - packUse(id,a)*f;
+    return {id, before, after};
+  });
+}
+function spentText(x){
+  const P = PACK[x.id] || {}, used = x.before - x.after;
+  if (P.g || P.ml) return `Usas ${amountText(x.id, used)} · quedan unos ${amountText(x.id, x.after)}`;
+  if (P.n > 1) return `Usas ${amountText(x.id, used)} · quedan unos ${amountText(x.id, x.after)}`;
+  return `${lvName(x.before)} → ${lvName(x.after).toLowerCase()}`;
+}
+let doneKey = null, doneStars = null, undoSnap = null;
+function openDone(k){ doneKey = k; doneStars = starsOf(k); mode = "done"; openSheet(); renderDone(); }
+function renderDone(){
+  const k = doneKey, pv = cookPreview(k), notHad = R[k].ing.filter(([id])=>!have.has(id) && ING[id].s!=="especias");
+  const rows = pv.filter(x=>ING[x.id].s!=="especias" || x.after<=.05).map(x=>`<li><span class="ic">${icon(x.id)}</span><span><b>${esc(ING[x.id].n)}</b><br><small>${x.after<=.05?"Se acaba: lo quito de casa y lo apunto para comprar":esc(spentText(x))}</small></span></li>`).join("");
+  const e = doneStars;
+  $("panel").innerHTML = `<button class="close" id="rClose" aria-label="Cerrar">✕</button>
+    <div class="ptop"><div class="eyebrow">¡Plato hecho!</div><h2 id="rTitle">${esc(R[k].n)}</h2>
+    <h3>¿Qué tal te ha salido?</h3>
+    <div class="stars big" role="group" aria-label="Valoración de 0 a 5"><button class="s0${e===0?" on":""}" data-dstar="0">0</button>${[1,2,3,4,5].map(n=>`<button class="${e!=null&&n<=e?"on":""}" data-dstar="${n}" aria-label="${n}">★</button>`).join("")}</div>
+    <p class="legend" style="margin:0">${e==null?"Toca las estrellas (0 si no te ha gustado). Los platos que más te gustan saldrán más en el menú y los de 0 o 1 estrella ya no saldrán solos.":["No te ha gustado: no lo pondré en el menú automático.","No mucho: no lo pondré en el menú automático.","Regular.","Bien.","¡Muy rico!","¡De los mejores!"][e]}</p>
+    <h3>Lo que descuento de casa</h3>
+    ${rows?`<ul class="donelist">${rows}</ul>`:`<p class="legend">No tenías marcado nada de esta receta en casa, así que no cambio nada.</p>`}
+    ${pv.some(x=>ING[x.id].s==="especias")?`<p class="legend" style="margin:0">También descuento un poco de aceite, sal y especias.</p>`:""}
+    ${notHad.length?`<p class="legend" style="margin:0">No estaba marcado en casa: ${esc(notHad.map(([id])=>ING[id].n.toLowerCase()).join(", "))}. No lo toco.</p>`:""}
+    <div class="quick"><button class="btn primary" id="doneSave">✓ Guardar</button><button class="btn" id="doneCancel">Cancelar</button></div></div>`;
+}
+function saveDone(){
+  const k = doneKey;
+  undoSnap = {have:[...have], lvl:{...lvl}, notas:JSON.parse(JSON.stringify(notas)), menu:clone(menu)};
+  cookPreview(k).forEach(x=>{ if (x.after<=.05){ have.delete(x.id); delete lvl[x.id]; } else lvl[x.id] = Math.round(x.after*100)/100; });
+  const n = notas[k] || {n:0}; n.n = (n.n||0) + 1; n.f = new Date().toISOString(); if (doneStars!=null) n.e = doneStars; notas[k] = n;
+  /* Marca el plato en el menú: el primero de la semana con esa receta, empezando por hoy */
+  const t = nowInfo().dayIdx; let marked = false;
+  for (let d=0; d<7 && !marked; d++){ const i = (t + d) % 7, j = (t - d + 7) % 7;
+    for (const ii of d ? [j, i] : [i]) for (const m of ["d","c","n"]) { const sl = menu[ii][m]; if (!marked && sl && !sl.fuera && !sl.sobras && sl.r===k && !sl.hecho){ sl.hecho = true; marked = true; } } }
+  saveLvl(); persist(); saveNotas(); if (marked) saveMenu();
+  doneKey = null; $("sheet").hidden = true; mode = null; cur = null; document.body.style.overflow = "";
+  renderAll(); toast("✓ Hecho. He actualizado lo que queda en casa", "Deshacer");
+}
+function undoDone(){
+  if (!undoSnap) return;
+  have = new Set(undoSnap.have); lvl = undoSnap.lvl; notas = undoSnap.notas; menu = undoSnap.menu; undoSnap = null;
+  saveLvl(); persist(); saveNotas(); saveMenu(); renderAll(); toast("Deshecho");
+}
+
 /* ---------- Guardado ---------- */
 let dbDespensa = null, dbMenu = null, writing = Promise.resolve(), tHave = null, tMenu = null;
 const okMsg = "Guardado. Lo verás igual en el móvil y en el ordenador.", localMsg = "Guardado en este móvil.";
@@ -3649,6 +3739,8 @@ function toggle(id){
     if (!db) { $("sync").textContent = localMsg; setTimeout(()=>{ renderSug(); loadRemoteSugs(); }); return; }
     dbDespensa = db.doc("casa/despensa");
     dbMenu = db.doc("casa/menu");
+    dbNotas = db.doc("casa/notas");
+    dbNotas.onSnapshot(snap => { if (snap.metadata.hasPendingWrites) return; if (snap.exists && snap.data().notas) { notas = snap.data().notas; try{localStorage.setItem("micocina.notas", JSON.stringify(notas));}catch(e){} if (mode==="recipe") renderRecipe(); renderCocina(); } }, () => {});
     dbSug = db.collection("sugerencias");
     dbSug.onSnapshot(snap => { sugs = snap.docs.map(d=>({id:d.id, ...d.data()})); renderSug(); }, () => {});
     dbDespensa.onSnapshot(snap => {
@@ -3787,6 +3879,12 @@ document.addEventListener("click", (e) => {
   if (t.dataset.slot) { const [i,m] = t.dataset.slot.split("-"); return openPicker(i, m); }
   if (t.dataset.toggle) return toggle(t.dataset.toggle);
   if (t.dataset.cycle) return cycle(t.dataset.cycle);
+  if (t.dataset.done) return openDone(t.dataset.done);
+  if (t.dataset.dstar) { doneStars = +t.dataset.dstar; return renderDone(); }
+  if (t.dataset.rstar) { const k = cur, v = +t.dataset.rstar; const n = notas[k] || {n:0}; n.e = v; notas[k] = n; saveNotas(); renderRecipe(); renderCocina(); return toast(v<=1 ? "Valorado. No lo pondré en el menú automático" : "Valoración guardada"); }
+  if (t.id === "doneSave") return saveDone();
+  if (t.id === "doneCancel") { doneKey = null; mode = "recipe"; return renderRecipe(); }
+  if (t.id === "toastAct") { $("toast").hidden = true; return undoDone(); }
   if (t.dataset.ingideas) { ck = {pool:"all", col:false, rap:false, veg:false, cat:"all", ing:t.dataset.ingideas}; ckOpen = {can:false, one:false}; show("cocina"); renderCocina(); window.scrollTo(0,0); return; }
   if (t.dataset.ckingclear) { ck.ing = null; return renderCocina(); }
   if (t.dataset.personas) { personas = +t.dataset.personas; saveMenu(); return renderAll(); }
